@@ -1,0 +1,14 @@
+# Created by .ignore support plugin (hsz.mobi)
+.idea
+.idea/*
+
+.sdo
+.sdo/*
+
+*.sln.DotSettings.user
+
+RakDotNet/bin
+RakDotNet/bin/*
+
+RakDotNet/obj
+RakDotNet/obj/*
