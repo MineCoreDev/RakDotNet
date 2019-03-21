@@ -2,15 +2,21 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RakDotNet", "RakDotNet\RakDotNet.csproj", "{3EE61CCD-0598-4870-965C-8CE802C131A8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RakDotNet.Tests", "RakDotNet.Tests\RakDotNet.Tests.csproj", "{9B18B571-0222-4585-93AC-F44F12BE5CA5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+		Debug|Any CPU = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3EE61CCD-0598-4870-965C-8CE802C131A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3EE61CCD-0598-4870-965C-8CE802C131A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3EE61CCD-0598-4870-965C-8CE802C131A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3EE61CCD-0598-4870-965C-8CE802C131A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EE61CCD-0598-4870-965C-8CE802C131A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EE61CCD-0598-4870-965C-8CE802C131A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B18B571-0222-4585-93AC-F44F12BE5CA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B18B571-0222-4585-93AC-F44F12BE5CA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B18B571-0222-4585-93AC-F44F12BE5CA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B18B571-0222-4585-93AC-F44F12BE5CA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 EndGlobal
