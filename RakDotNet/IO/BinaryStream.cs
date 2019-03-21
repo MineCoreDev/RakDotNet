@@ -168,6 +168,11 @@ namespace RakDotNet.IO
             }
         }
 
+        public void Reset()
+        {
+            Position = 0;
+        }
+
         private byte[] Reverse(byte[] buffer, ByteOrder order)
         {
             if (BitConverter.IsLittleEndian ^ order == ByteOrder.Little)
