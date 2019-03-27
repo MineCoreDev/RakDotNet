@@ -12,3 +12,5 @@ RakDotNet/bin/*
 
 RakDotNet/obj
 RakDotNet/obj/*
+
+*.exe
