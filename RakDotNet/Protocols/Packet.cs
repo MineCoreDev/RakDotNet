@@ -3,17 +3,9 @@ using RakDotNet.IO;
 
 namespace RakDotNet.Protocols
 {
-    public class Packet : NetworkStream
+    public abstract class Packet : NetworkStream
     {
         public IPEndPoint EndPoint { get; set; }
-
-        public Packet()
-        {
-        }
-
-        public Packet(byte[] buffer) : base(buffer)
-        {
-        }
 
         public virtual void EncodeHeader()
         {

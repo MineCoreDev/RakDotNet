@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace RakDotNet.Protocols
 {
-    public class RakNetPacket : Packet
+    public abstract class RakNetPacket : Packet
     {
         public readonly ReadOnlyCollection<byte> Magic =
             new ReadOnlyCollection<byte>(new List<byte>(new byte[16]
@@ -15,6 +15,18 @@ namespace RakDotNet.Protocols
                 0xfd, 0xfd, 0xfd, 0xfd,
                 0x12, 0x34, 0x56, 0x78
             }));
+
+        public abstract byte PacketId { get; }
+
+        public override void EncodeHeader()
+        {
+            WriteByte(PacketId);
+        }
+
+        public override void DecodeHeader()
+        {
+            ReadByte();
+        }
 
         public byte[] ReadMagic()
         {
@@ -38,15 +50,15 @@ namespace RakDotNet.Protocols
             return true;
         }
 
-        public override void EncodeHeader()
-        {
-            WriteMagic();
-        }
-
-        public override void DecodeHeader()
+        public void CheckMagic()
         {
             if (!IsMatchMagic())
-                throw new FormatException("Not match RakNet magic");
+                ThrowFormatException();
+        }
+
+        private void ThrowFormatException()
+        {
+            throw new FormatException("Not match RakNet magic");
         }
     }
 }

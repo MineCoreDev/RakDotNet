@@ -17,7 +17,11 @@ namespace RakDotNet.IO
 
         public new byte ReadByte()
         {
-            return (byte) base.ReadByte();
+            int val = base.ReadByte();
+            if (val != -1)
+                return (byte) val;
+
+            throw new IndexOutOfRangeException();
         }
 
         public sbyte ReadSByte()
@@ -110,6 +114,28 @@ namespace RakDotNet.IO
             WriteBytes(Reverse(BitConverter.GetBytes(value), order));
         }
 
+        public uint ReadTriad(ByteOrder order = ByteOrder.Big)
+        {
+            byte[] buffer = Reverse(ReadBytes(3), order);
+            uint value = BitConverter.ToUInt32(new byte[]
+            {
+                buffer[0],
+                buffer[1],
+                buffer[2],
+                0x00
+            });
+
+            return value;
+        }
+
+        public void WriteTriad(uint value, ByteOrder order = ByteOrder.Big)
+        {
+            byte[] buffer = Reverse(BitConverter.GetBytes(value & 0xffffff), order);
+            WriteBytes(order == ByteOrder.Big
+                ? new byte[] {buffer[1], buffer[2], buffer[3]}
+                : new byte[] {buffer[0], buffer[1], buffer[2]});
+        }
+
         public string ReadStringUtf8(ByteOrder order = ByteOrder.Big)
         {
             ushort len = ReadUShort(order);
@@ -160,6 +186,18 @@ namespace RakDotNet.IO
             return buff;
         }
 
+        public byte[] ReadBytes()
+        {
+            byte[] buff = new byte[Length - Position];
+            int idx = 0;
+            while (Length != Position)
+            {
+                buff[idx] = ReadByte();
+            }
+
+            return buff;
+        }
+
         public void WriteBytes(byte[] buffer)
         {
             for (int i = 0; i < buffer.Length; i++)
@@ -168,9 +206,35 @@ namespace RakDotNet.IO
             }
         }
 
+        public void WriteBytes(byte[] buffer, int length)
+        {
+            for (int i = 0; i < length; i++)
+            {
+                WriteByte(buffer[i]);
+            }
+        }
+
         public void Reset()
         {
             Position = 0;
+        }
+
+        public void Clear()
+        {
+            SetLength(0);
+            Reset();
+        }
+
+        public void SetBuffer(byte[] buffer)
+        {
+            Clear();
+            WriteBytes(buffer);
+            Reset();
+        }
+
+        public override byte[] GetBuffer()
+        {
+            return ToArray();
         }
 
         private byte[] Reverse(byte[] buffer, ByteOrder order)

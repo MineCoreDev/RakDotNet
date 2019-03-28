@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using NUnit.Framework;
 using RakDotNet.IO;
 
@@ -29,6 +30,8 @@ namespace RakDotNet.Tests
             stream.WriteDouble(8123.456789);
             stream.WriteFloat(4123.456f, ByteOrder.Little);
             stream.WriteDouble(8123.456789, ByteOrder.Little);
+            stream.WriteTriad(0xffffff);
+            stream.WriteTriad(0xffffff, ByteOrder.Little);
             stream.WriteStringUtf8("strstrほげほげ");
             stream.WriteStringUtf8("strstrほげほげ", ByteOrder.Little);
             stream.WriteTimeSpan(new TimeSpan(0, 0, 5, 40, 91));
@@ -53,6 +56,8 @@ namespace RakDotNet.Tests
             Assert.True(Math.Abs(read.ReadDouble() - 8123.456789) < 0.001d);
             Assert.True(Math.Abs(read.ReadFloat(ByteOrder.Little) - 4123.456f) < 0.001f);
             Assert.True(Math.Abs(read.ReadDouble(ByteOrder.Little) - 8123.456789) < 0.001d);
+            Assert.True(read.ReadTriad() == 0xffffff);
+            Assert.True(read.ReadTriad(ByteOrder.Little) == 0xffffff);
             Assert.True(read.ReadStringUtf8() == "strstrほげほげ");
             Assert.True(read.ReadStringUtf8(ByteOrder.Little) == "strstrほげほげ");
             Assert.True(read.ReadTimeSpan() ==
@@ -74,6 +79,64 @@ namespace RakDotNet.Tests
             Assert.True(stream.ReadByte() == 123);
             stream.Reset();
             Assert.True(stream.ReadByte() == 0x11);
+        }
+
+        [Test]
+        public void OutOfStream()
+        {
+            var stream = new BinaryStream(new byte[]
+            {
+                0x11, 0x01, 0xff
+            });
+            Assert.Catch<IndexOutOfRangeException>(() => { stream.ReadInt(); });
+        }
+
+        [Test]
+        public void SetBuffer()
+        {
+            var stream = new BinaryStream();
+            stream.SetBuffer(new byte[]
+            {
+                0x00,
+                0xff,
+                0x00
+            });
+            Assert.True(stream.ReadByte() == 0x00);
+            Assert.True(stream.ReadByte() == 0xff);
+            Assert.True(stream.ReadByte() == 0x00);
+        }
+
+        [Test]
+        public void ClearAndReset()
+        {
+            var stream = new BinaryStream(new byte[]
+            {
+                0x11, 0x01, 0xff
+            });
+            stream.Clear();
+            Assert.Throws<IndexOutOfRangeException>(() => { stream.ReadByte(); });
+        }
+
+        [Test]
+        public void ReadAllByte()
+        {
+            var stream = new BinaryStream(new byte[]
+            {
+                0x11, 0x01, 0xff
+            });
+            Assert.True(stream.ReadByte() == 0x11);
+            Assert.True(stream.ReadBytes().Length == 2);
+        }
+
+        [Test]
+        public void WriteLenByte()
+        {
+            var stream = new BinaryStream();
+            stream.WriteBytes(new byte[]
+            {
+                0x11, 0x01, 0xff
+            }, 2);
+            Assert.True(stream.Position == 2);
         }
 
         [Test]

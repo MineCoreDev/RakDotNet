@@ -33,7 +33,7 @@ namespace RakDotNet
             return await _natDevice.GetSpecificMappingAsync(Protocol.Udp, port) != null;
         }
 
-        public static RakNetClient StartClient(IPEndPoint endPoint)
+        public static RakNetClient CreateClient(IPEndPoint endPoint)
         {
             return new RakNetClient(endPoint);
         }
