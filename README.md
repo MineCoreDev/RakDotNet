@@ -1,0 +1,4 @@
+# RakDotNet
+
+ネイティブ実装無しのRakNetライブラリ
+現在はMinecraftBEで使用する最低限の機能を目指しています。
