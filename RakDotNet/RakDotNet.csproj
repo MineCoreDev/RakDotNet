@@ -8,11 +8,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Open.NAT" Version="2.1.0" />
+      <Folder Include=".nuget" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include=".nuget" />
+      <PackageReference Include="Open.NAT.Core" Version="2.1.0" />
     </ItemGroup>
 
 </Project>
