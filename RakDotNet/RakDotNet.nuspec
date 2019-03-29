@@ -2,14 +2,12 @@
 <package>
     <metadata>
         <id>RakDotNet</id>
-        <version>0.0.1.0-beta</version>
-        <title>EngineGL</title>
+        <title>RakDotNet</title>
         <authors>hiroki</authors>
+        <version>$version$</version>
         <owners>hiroki19990625</owners>
-        <licenseUrl>https://github.com/MineCoreDev/RakDotNet/blob/master/LICENSE</licenseUrl>
         <projectUrl>https://github.com/MineCoreDev/RakDotNet/</projectUrl>
         <!-- <iconUrl></iconUrl> -->
-        <requireLicenseAcceptance>true</requireLicenseAcceptance>
         <description>C# 100% RakNet Library</description>
         <copyright>Copyright chiroki 2019</copyright>
         <tags>NetworkLibrary</tags>

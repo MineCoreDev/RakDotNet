@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using RakDotNet.Protocols;
+using RakDotNet.Protocols.Packets;
 using RakDotNet.Utils;
 
 namespace RakDotNet

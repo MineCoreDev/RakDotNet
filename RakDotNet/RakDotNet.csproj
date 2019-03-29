@@ -5,14 +5,16 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <Configurations>Release;Debug</Configurations>
         <Platforms>AnyCPU;x86</Platforms>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+        <NuspecFile>RakDotNet.nuspec</NuspecFile>
+        <Deterministic>false</Deterministic>
+        <VersionPrefix>0.0.2</VersionPrefix>
+        <VersionSuffix>beta</VersionSuffix>
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include=".nuget" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Open.NAT.Core" Version="2.1.0" />
+        <PackageReference Include="Open.NAT.Core" Version="2.1.0"/>
     </ItemGroup>
 
 </Project>

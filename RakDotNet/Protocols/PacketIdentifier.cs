@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 using RakDotNet.Protocols.Packets;
+using RakDotNet.Protocols.Packets.Minecraft;
 
 namespace RakDotNet.Protocols
 {
