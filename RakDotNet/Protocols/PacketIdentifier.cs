@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Threading.Tasks;
 using RakDotNet.Protocols.Packets;
 using RakDotNet.Protocols.Packets.Minecraft;
+using RakDotNet.Protocols.Packets.Minecraft.ConnectionPackets;
+using RakDotNet.Protocols.Packets.Minecraft.PingPackets;
 
 namespace RakDotNet.Protocols
 {

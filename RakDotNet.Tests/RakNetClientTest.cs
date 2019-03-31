@@ -3,6 +3,7 @@ using System.Net;
 using NUnit.Framework;
 using RakDotNet.Protocols.Packets;
 using RakDotNet.Protocols.Packets.Minecraft;
+using RakDotNet.Protocols.Packets.Minecraft.PingPackets;
 
 namespace RakDotNet.Tests
 {

@@ -3,6 +3,8 @@ using System.Net;
 using RakDotNet.Protocols;
 using RakDotNet.Protocols.Packets;
 using RakDotNet.Protocols.Packets.Minecraft;
+using RakDotNet.Protocols.Packets.Minecraft.ConnectionPackets;
+using RakDotNet.Protocols.Packets.Minecraft.PingPackets;
 using RakDotNet.Utils;
 
 namespace RakDotNet.Server.Minecraft

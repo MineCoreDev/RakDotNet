@@ -1,4 +1,4 @@
-namespace RakDotNet.Protocols.Packets.Minecraft
+namespace RakDotNet.Protocols.Packets.Minecraft.ConnectionPackets
 {
     public class IncompatibleProtocolVersion : RakNetPacket
     {
