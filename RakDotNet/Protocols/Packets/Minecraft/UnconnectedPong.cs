@@ -2,25 +2,28 @@ using System;
 
 namespace RakDotNet.Protocols.Packets.Minecraft
 {
-    public class UnconnectedPing : RakNetPacket
+    public class UnconnectedPong : RakNetPacket
     {
-        public override byte PacketId => PacketIdentifier.UNCONNECTED_PING;
+        public override byte PacketId => PacketIdentifier.UNCONNECTED_PONG;
 
         public TimeSpan TimeStamp { get; set; }
-        public long PingId { get; set; }
+        public long PongId { get; set; }
+        public String Identifier;
 
         public override void EncodePayload()
         {
             WriteLong((long) TimeStamp.TotalMilliseconds);
+            WriteLong(PongId);
             WriteMagic();
-            WriteLong(PingId);
+            WriteStringUtf8(Identifier);
         }
 
         public override void DecodePayload()
         {
             TimeStamp = TimeSpan.FromMilliseconds(ReadLong());
+            PongId = ReadLong();
             CheckMagic();
-            PingId = ReadLong();
+            Identifier = ReadStringUtf8();
         }
     }
 }

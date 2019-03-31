@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -147,17 +148,22 @@ namespace RakDotNet.Protocols
         public const int RESERVED_9 = 0x85;
         public const int USER_PACKET_ENUM = 0x86;
 
-        private Dictionary<int, Type> _packetIdentifier = new Dictionary<int, Type>();
-        private Dictionary<int, Func<RakNetPacket>> _identifierCreateFunc = new Dictionary<int, Func<RakNetPacket>>();
+        private ConcurrentDictionary<int, Type> _packetIdentifier = new ConcurrentDictionary<int, Type>();
+
+        private ConcurrentDictionary<int, Func<RakNetPacket>> _identifierCreateFunc =
+            new ConcurrentDictionary<int, Func<RakNetPacket>>();
 
         public PacketIdentifier()
         {
-            RegisterDefaults();
         }
 
-        public void RegisterDefaults()
+        public void RegisterMinecraftDefaults()
         {
+            Reset();
+
             Register(UNCONNECTED_PING, typeof(UnconnectedPing));
+            Register(UNCONNECTED_PONG, typeof(UnconnectedPong));
+            Register(OPEN_CONNECTION_REQUEST_1, typeof(OpenConnectionRequestOne));
 
             CompileAll();
         }
@@ -195,6 +201,11 @@ namespace RakDotNet.Protocols
         }
 
         public void Dispose()
+        {
+            Reset();
+        }
+
+        private void Reset()
         {
             _packetIdentifier.Clear();
             _identifierCreateFunc.Clear();

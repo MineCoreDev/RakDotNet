@@ -3,11 +3,15 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Open.Nat;
+using RakDotNet.Utils;
 
 namespace RakDotNet
 {
     public class RakNet
     {
+        public const int SERVER_NETWORK_PROTOCOL = 9;
+        public const int CLIENT_NETWORK_PROTOCOL = 9;
+        
         private static NatDiscoverer _natDiscoverer;
         private static NatDevice _natDevice;
 
@@ -16,16 +20,16 @@ namespace RakDotNet
             InitNatDevice();
         }
 
-        public static async void ForwardPort(UpnpPort port)
+        public static async void ForwardPort(UPnPSettings settings)
         {
             await _natDevice.CreatePortMapAsync(new Mapping(Protocol.Udp,
-                port.PrivatePort, port.PublicPort, port.LifeTime, "RakNet UPnP"));
+                settings.PrivatePort, settings.PublicPort, settings.LifeTime, "RakNet UPnP"));
         }
 
-        public static async void ClosePort(UpnpPort port)
+        public static async void ClosePort(UPnPSettings settings)
         {
             await _natDevice.DeletePortMapAsync(new Mapping(Protocol.Udp,
-                port.PrivatePort, port.PublicPort, port.LifeTime, "RakNet UPnP"));
+                settings.PrivatePort, settings.PublicPort, settings.LifeTime, "RakNet UPnP"));
         }
 
         public static async Task<bool> IsForwardedPort(ushort port)

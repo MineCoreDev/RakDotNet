@@ -1,9 +1,6 @@
 using System;
-using System.ComponentModel;
 using System.Net;
 using NUnit.Framework;
-using RakDotNet.IO;
-using RakDotNet.Protocols;
 using RakDotNet.Protocols.Packets;
 using RakDotNet.Protocols.Packets.Minecraft;
 

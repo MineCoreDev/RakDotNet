@@ -1,12 +1,12 @@
-namespace RakDotNet
+namespace RakDotNet.Utils
 {
-    public struct UpnpPort
+    public struct UPnPSettings
     {
         public ushort PrivatePort { get; }
         public ushort PublicPort { get; }
         public int LifeTime { get; }
 
-        public UpnpPort(ushort privatePort, ushort publicPort, int lifeTime)
+        public UPnPSettings(ushort privatePort, ushort publicPort, int lifeTime)
         {
             PrivatePort = privatePort;
             PublicPort = publicPort;
