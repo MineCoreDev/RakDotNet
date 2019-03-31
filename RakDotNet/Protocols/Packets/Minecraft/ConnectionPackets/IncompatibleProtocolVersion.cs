@@ -5,20 +5,20 @@ namespace RakDotNet.Protocols.Packets.Minecraft.ConnectionPackets
         public override byte PacketId => PacketIdentifier.INCOMPATIBLE_PROTOCOL_VERSION;
 
         public byte NetworkProtocol { get; set; }
-        public long SererGuid { get; set; }
+        public long ServerGuid { get; set; }
 
         public override void EncodePayload()
         {
             WriteByte(NetworkProtocol);
             WriteMagic();
-            WriteLong(SererGuid);
+            WriteLong(ServerGuid);
         }
 
         public override void DecodePayload()
         {
             NetworkProtocol = ReadByte();
             CheckMagic();
-            SererGuid = ReadLong();
+            ServerGuid = ReadLong();
         }
     }
 }

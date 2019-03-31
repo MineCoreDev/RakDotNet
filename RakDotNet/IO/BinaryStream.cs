@@ -15,6 +15,16 @@ namespace RakDotNet.IO
         {
         }
 
+        public bool ReadBoolean()
+        {
+            return ReadByte() == 1;
+        }
+
+        public void WriteBoolean(bool value)
+        {
+            WriteByte(value ? (byte) 1 : (byte) 0);
+        }
+
         public new byte ReadByte()
         {
             int val = base.ReadByte();
