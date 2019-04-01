@@ -50,7 +50,14 @@ namespace RakDotNet
                         WorkerCancelToken.Token.ThrowIfCancellationRequested();
                     }
 
-                    OnReceive?.Invoke(await ReceivePacket());
+                    try
+                    {
+                        OnReceive?.Invoke(await ReceivePacket());
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Warn(e);
+                    }
                 }
             }, WorkerCancelToken.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
@@ -64,8 +71,15 @@ namespace RakDotNet
             packet.EndPoint = result.RemoteEndPoint;
             DownloadBytes += (uint) result.Buffer.Length;
 
-            packet.DecodeHeader();
-            packet.DecodePayload();
+            try
+            {
+                packet.DecodeHeader();
+                packet.DecodePayload();
+            }
+            catch (Exception e)
+            {
+                throw new PacketDecodeException(e.Message);
+            }
 
             return packet;
         }
@@ -81,8 +95,15 @@ namespace RakDotNet
 
         public async void SendPacket(RakNetPacket packet)
         {
-            packet.EncodeHeader();
-            packet.EncodePayload();
+            try
+            {
+                packet.EncodeHeader();
+                packet.EncodePayload();
+            }
+            catch (Exception e)
+            {
+                throw new PacketEncodeException(e.Message);
+            }
 
             byte[] buf = packet.GetBuffer();
             UploadBytes += (ulong) await SendAsync(buf, buf.Length, packet.EndPoint);

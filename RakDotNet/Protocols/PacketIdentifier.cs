@@ -6,9 +6,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 using RakDotNet.Protocols.Packets;
-using RakDotNet.Protocols.Packets.Minecraft;
-using RakDotNet.Protocols.Packets.Minecraft.ConnectionPackets;
-using RakDotNet.Protocols.Packets.Minecraft.PingPackets;
+using RakDotNet.Protocols.Packets.ConnectionPackets;
+using RakDotNet.Protocols.Packets.PingPackets;
 
 namespace RakDotNet.Protocols
 {
@@ -157,15 +156,21 @@ namespace RakDotNet.Protocols
 
         public PacketIdentifier()
         {
+            RegisterDefaults();
         }
 
-        public void RegisterMinecraftDefaults()
+        public void RegisterDefaults()
         {
             Reset();
 
             Register(UNCONNECTED_PING, typeof(UnconnectedPing));
+            Register(UNCONNECTED_PING_OPEN_CONNECTIONS, typeof(UnconnectedPingOpenConnections));
             Register(UNCONNECTED_PONG, typeof(UnconnectedPong));
+
             Register(OPEN_CONNECTION_REQUEST_1, typeof(OpenConnectionRequestOne));
+            Register(OPEN_CONNECTION_REPLY_1, typeof(OpenConnectionReplyOne));
+            Register(OPEN_CONNECTION_REQUEST_2, typeof(OpenConnectionRequestTwo));
+            Register(OPEN_CONNECTION_REPLY_2, typeof(OpenConnectionReplyTwo));
 
             CompileAll();
         }
@@ -199,7 +204,7 @@ namespace RakDotNet.Protocols
             if (_identifierCreateFunc.ContainsKey(id))
                 return _identifierCreateFunc[id].Invoke();
 
-            throw new KeyNotFoundException();
+            throw new KeyNotFoundException($"{id} is key not found.");
         }
 
         public void Dispose()

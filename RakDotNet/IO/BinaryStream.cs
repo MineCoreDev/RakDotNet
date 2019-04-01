@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 
 namespace RakDotNet.IO
@@ -17,7 +18,7 @@ namespace RakDotNet.IO
 
         public bool ReadBoolean()
         {
-            return ReadByte() == 1;
+            return ReadByte() > 0;
         }
 
         public void WriteBoolean(bool value)
@@ -185,6 +186,73 @@ namespace RakDotNet.IO
             WriteLong(time.ToBinary(), order);
         }
 
+        public Guid ReadGuid(ByteOrder order = ByteOrder.Big)
+        {
+            byte[] most = Reverse(ReadBytes(8), order);
+            byte[] least = Reverse(ReadBytes(8), order);
+
+            return new Guid(most.Concat(least).ToArray());
+        }
+
+        public void WriteGuid(Guid guid, ByteOrder order = ByteOrder.Big)
+        {
+            byte[] buffer = guid.ToByteArray();
+            byte[] most = Reverse(buffer.Take(8).ToArray(), order);
+            byte[] least = Reverse(buffer.Skip(8).ToArray(), order);
+
+            WriteBytes(most);
+            WriteBytes(least);
+        }
+
+        public IPEndPoint ReadIpEndPoint(ByteOrder order = ByteOrder.Big)
+        {
+            byte version = ReadByte();
+            byte[] address;
+            if (version == 4)
+                address = new byte[4];
+            else if (version == 6)
+                address = new byte[16];
+            else
+                throw new NotSupportedException($"IPv{version} not support.");
+
+            for (int i = 0; i < address.Length; i++)
+            {
+                address[i] = (byte) (~ReadByte() & 0xff);
+            }
+
+            if (version == 6)
+                ReadBytes(10);
+
+            ushort port = ReadUShort(order);
+            return new IPEndPoint(new IPAddress(address), port);
+        }
+
+        public void WriteIpEndPoint(IPEndPoint endPoint, ByteOrder order = ByteOrder.Big)
+        {
+            if (endPoint == null)
+                throw new ArgumentNullException(nameof(endPoint));
+            else if (endPoint.Address == null)
+                throw new ArgumentNullException(nameof(endPoint.Address));
+
+            byte[] address = endPoint.Address.GetAddressBytes();
+            if (address.Length == 4)
+                WriteByte(4);
+            else if (address.Length == 16)
+                WriteByte(6);
+            else
+                throw new NotSupportedException($"{address.Length} is not support length");
+
+            for (int i = 0; i < address.Length; i++)
+            {
+                WriteByte((byte) (~address[i] & 0xff));
+            }
+
+            if (address.Length == 16)
+                WriteBytes(new byte[10]);
+
+            WriteUShort((ushort) endPoint.Port, order);
+        }
+
         public byte[] ReadBytes(int length)
         {
             byte[] buff = new byte[length];
@@ -233,6 +301,11 @@ namespace RakDotNet.IO
         {
             SetLength(0);
             Reset();
+        }
+
+        public bool IsEndOfStream()
+        {
+            return Length >= Position;
         }
 
         public void SetBuffer(byte[] buffer)

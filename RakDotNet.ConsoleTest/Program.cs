@@ -2,7 +2,7 @@
 using System.Net;
 using System.Text;
 using RakDotNet.IO;
-using RakDotNet.Server.Minecraft;
+using RakDotNet.Minecraft;
 
 namespace RakDotNet.ConsoleTest
 {

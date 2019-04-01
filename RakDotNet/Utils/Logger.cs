@@ -5,7 +5,10 @@ namespace RakDotNet.Utils
 {
     public static class Logger
     {
-        public static Action<ILog> PrintCallBack { get; set; } = log => { Console.WriteLine(log.Message); };
+        public static Action<ILog> PrintCallBack { private get; set; } = log =>
+        {
+            Console.WriteLine($"[{log.Type}] {log.Message}");
+        };
 
         internal static void Debug(object message)
         {

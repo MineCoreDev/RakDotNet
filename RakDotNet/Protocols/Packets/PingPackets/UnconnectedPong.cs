@@ -1,6 +1,6 @@
 using System;
 
-namespace RakDotNet.Protocols.Packets.Minecraft.PingPackets
+namespace RakDotNet.Protocols.Packets.PingPackets
 {
     public class UnconnectedPong : RakNetPacket
     {

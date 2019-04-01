@@ -1,7 +1,7 @@
 using System.Net;
 using RakDotNet.IO;
 
-namespace RakDotNet.Protocols.Packets
+namespace RakDotNet.Protocols
 {
     public abstract class Packet : NetworkStream
     {
