@@ -13,7 +13,7 @@ namespace RakDotNet.Minecraft.Packets
         public override byte PacketId => _packetId;
 
         public uint SequenceId { get; set; }
-        public EncapsulatedPacket[] Packets { get; }
+        public EncapsulatedPacket[] Packets { get; set; }
 
         public CustomPacket()
         {
@@ -35,17 +35,25 @@ namespace RakDotNet.Minecraft.Packets
         public override void EncodePayload()
         {
             WriteTriad(SequenceId, ByteOrder.Little);
-            
+
             List<EncapsulatedPacket> packets = new List<EncapsulatedPacket>();
             while (!IsEndOfStream())
             {
                 packets.Add(new EncapsulatedPacket(this));
             }
+
+            Packets = packets.ToArray();
         }
 
         public override void DecodePayload()
         {
             SequenceId = ReadTriad(ByteOrder.Little);
+
+            for (int i = 0; i < Packets.Length; i++)
+            {
+                EncapsulatedPacket packet = Packets[i];
+                packet.WriteToCustomPacket(this);
+            }
         }
     }
 }

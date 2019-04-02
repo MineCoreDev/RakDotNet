@@ -55,7 +55,37 @@ namespace RakDotNet.Minecraft.Packets
         {
             return 1 + 2 + (Reliability.IsReliable() ? 3 : 0) +
                    (Reliability.IsOrdered() || Reliability.IsSequenced() ? 4 : 0) +
-                   (Split ? 10 : 0);
+                   (Split ? 10 : 0) + Payload.Length;
+        }
+
+        public void WriteToCustomPacket(CustomPacket packet)
+        {
+            byte flags = 0;
+            flags |= (byte) ((byte) Reliability << FLAG_RELIABILITY_INDEX);
+            flags |= Split ? FLAG_SPLIT : (byte) 0;
+
+            packet.WriteByte(flags);
+            packet.WriteUShort((ushort) (Payload.Length * 8));
+
+            if (Reliability.IsReliable())
+            {
+                packet.WriteTriad(MessageIndex, ByteOrder.Little);
+            }
+
+            if (Reliability.IsOrdered() || Reliability.IsSequenced())
+            {
+                packet.WriteTriad(OrderIndex, ByteOrder.Little);
+                packet.WriteByte(OrderChannel);
+            }
+
+            if (Split)
+            {
+                packet.WriteInt(SplitCount);
+                packet.WriteUShort(SplitId);
+                packet.WriteInt(SplitIndex);
+            }
+
+            packet.WriteBytes(Payload);
         }
     }
 }
