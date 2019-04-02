@@ -5,6 +5,7 @@ using RakDotNet.Minecraft.Packets;
 using RakDotNet.Minecraft.Packets.Acknowledge;
 using RakDotNet.Protocols.Packets;
 using RakDotNet.Protocols.Packets.MessagePackets;
+using RakDotNet.Utils;
 
 namespace RakDotNet.Server.Peer
 {
@@ -46,6 +47,8 @@ namespace RakDotNet.Server.Peer
         public virtual void HandleCustomPacket(CustomPacket packet)
         {
             SendAck(packet.SequenceId);
+
+            Logger.Log(packet.PacketId);
         }
 
         public virtual void HandleEncapsulatedPacket(IPEndPoint endPoint, EncapsulatedPacket packet)

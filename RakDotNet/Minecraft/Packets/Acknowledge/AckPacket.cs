@@ -8,7 +8,7 @@ namespace RakDotNet.Minecraft.Packets.Acknowledge
     {
         public override byte PacketId => MinecraftServer.ACK;
 
-        public List<Record> Records { get; set; }
+        public List<Record> Records { get; set; } = new List<Record>();
 
         public override void EncodePayload()
         {
