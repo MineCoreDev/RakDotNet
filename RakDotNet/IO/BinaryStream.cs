@@ -305,7 +305,7 @@ namespace RakDotNet.IO
 
         public bool IsEndOfStream()
         {
-            return Length >= Position;
+            return Length <= Position;
         }
 
         public void SetBuffer(byte[] buffer)

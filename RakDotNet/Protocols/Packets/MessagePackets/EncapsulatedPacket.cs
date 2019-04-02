@@ -1,7 +1,7 @@
 using RakDotNet.IO;
-using RakDotNet.Protocols.Packets;
+using RakDotNet.Minecraft.Packets;
 
-namespace RakDotNet.Minecraft.Packets
+namespace RakDotNet.Protocols.Packets.MessagePackets
 {
     public class EncapsulatedPacket
     {

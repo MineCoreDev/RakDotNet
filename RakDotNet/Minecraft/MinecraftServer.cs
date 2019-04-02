@@ -1,11 +1,13 @@
 using System;
 using System.Net;
 using RakDotNet.Minecraft.Packets;
+using RakDotNet.Minecraft.Packets.Acknowledge;
 using RakDotNet.Protocols;
 using RakDotNet.Protocols.Packets;
 using RakDotNet.Protocols.Packets.ConnectionPackets;
 using RakDotNet.Protocols.Packets.PingPackets;
 using RakDotNet.Server;
+using RakDotNet.Server.Peer;
 using RakDotNet.Utils;
 
 namespace RakDotNet.Minecraft
@@ -47,7 +49,9 @@ namespace RakDotNet.Minecraft
         {
             if (packet is CustomPacket customPacket && IsConnected(packet.EndPoint))
             {
-                Logger.Log(customPacket.SequenceId);
+                IPEndPoint endPoint = packet.EndPoint;
+                MinecraftPeer peer = GetPeer<MinecraftPeer>(endPoint);
+                peer.HandleCustomPacket(customPacket);
             }
             else if (packet is UnconnectedPing unconnectedPing)
             {
@@ -77,7 +81,16 @@ namespace RakDotNet.Minecraft
                 if (Client.EndPoint.Port != connectionRequestTwo.ConnectionEndPoint.Port)
                     throw new InvalidOperationException("connection port is not match.");
 
-                Connect(packet.EndPoint);
+                try
+                {
+                    Connect(packet.EndPoint, connectionRequestTwo.ClientGuid, connectionRequestTwo.MtuSize);
+                }
+                catch (InvalidOperationException e)
+                {
+                    MinecraftPeer peer = GetPeer<MinecraftPeer>(packet.EndPoint);
+                    peer.Disconnect();
+                    return;
+                }
 
                 OpenConnectionReplyTwo replyTwo =
                     (OpenConnectionReplyTwo) Client.PacketIdentifier.GetPacketFormId(PacketIdentifier
@@ -89,9 +102,9 @@ namespace RakDotNet.Minecraft
             }
         }
 
-        public override void Connect(IPEndPoint endPoint)
+        public override void Connect(IPEndPoint endPoint, long clientId, ushort mtuSize)
         {
-            MinecraftPeer peer = new MinecraftPeer(endPoint);
+            MinecraftPeer peer = new MinecraftPeer(endPoint, clientId, mtuSize);
             AddPeer(peer);
             peer.Connect(this);
         }
@@ -115,6 +128,9 @@ namespace RakDotNet.Minecraft
             identifier.Register(CUSTOM_PACKET_D, typeof(CustomPacket));
             identifier.Register(CUSTOM_PACKET_E, typeof(CustomPacket));
             identifier.Register(CUSTOM_PACKET_F, typeof(CustomPacket));
+
+            identifier.Register(ACK, typeof(AckPacket));
+            identifier.Register(NACK, typeof(NackPacket));
 
             identifier.CompileAll();
         }

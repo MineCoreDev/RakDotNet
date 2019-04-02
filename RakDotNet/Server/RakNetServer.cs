@@ -9,7 +9,7 @@ using RakDotNet.Server.Peer;
 
 namespace RakDotNet.Server
 {
-    public class RakNetServer : RakNetPacketHandler
+    public class RakNetServer : IRakNetPacketHandler
     {
         private ConcurrentDictionary<IPEndPoint, RakNetPeer> _connectedPeers =
             new ConcurrentDictionary<IPEndPoint, RakNetPeer>();
@@ -45,9 +45,9 @@ namespace RakDotNet.Server
                 throw new KeyNotFoundException();
         }
 
-        public virtual void Connect(IPEndPoint endPoint)
+        public virtual void Connect(IPEndPoint endPoint, long clientId, ushort mtuSize)
         {
-            RakNetPeer peer = new RakNetPeer(endPoint);
+            RakNetPeer peer = new RakNetPeer(endPoint, clientId, mtuSize);
             AddPeer(peer);
             peer.Connect(this);
         }

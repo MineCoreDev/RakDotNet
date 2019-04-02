@@ -1,6 +1,4 @@
-using System;
-
-namespace RakDotNet.Minecraft.Packets
+namespace RakDotNet.Protocols.Packets.MessagePackets
 {
     public enum Reliability
     {

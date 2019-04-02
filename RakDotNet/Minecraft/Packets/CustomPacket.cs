@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using RakDotNet.IO;
 using RakDotNet.Protocols;
 using RakDotNet.Protocols.Packets;
+using RakDotNet.Protocols.Packets.MessagePackets;
 using RakDotNet.Server;
+using RakDotNet.Utils;
 
 namespace RakDotNet.Minecraft.Packets
 {
@@ -36,6 +38,17 @@ namespace RakDotNet.Minecraft.Packets
         {
             WriteTriad(SequenceId, ByteOrder.Little);
 
+            for (int i = 0; i < Packets.Length; i++)
+            {
+                EncapsulatedPacket packet = Packets[i];
+                packet.WriteToCustomPacket(this);
+            }
+        }
+
+        public override void DecodePayload()
+        {
+            SequenceId = ReadTriad(ByteOrder.Little);
+
             List<EncapsulatedPacket> packets = new List<EncapsulatedPacket>();
             while (!IsEndOfStream())
             {
@@ -43,17 +56,6 @@ namespace RakDotNet.Minecraft.Packets
             }
 
             Packets = packets.ToArray();
-        }
-
-        public override void DecodePayload()
-        {
-            SequenceId = ReadTriad(ByteOrder.Little);
-
-            for (int i = 0; i < Packets.Length; i++)
-            {
-                EncapsulatedPacket packet = Packets[i];
-                packet.WriteToCustomPacket(this);
-            }
         }
     }
 }
