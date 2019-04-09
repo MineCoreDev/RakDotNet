@@ -51,7 +51,7 @@ namespace RakDotNet.Minecraft
             {
                 IPEndPoint endPoint = packet.EndPoint;
                 MinecraftPeer peer = GetPeer<MinecraftPeer>(endPoint);
-                peer.HandleCustomPacket(customPacket);
+                peer.HandlePeerPacket(customPacket);
             }
             else if (packet is UnconnectedPing unconnectedPing)
             {
@@ -85,7 +85,7 @@ namespace RakDotNet.Minecraft
                 {
                     Connect(packet.EndPoint, connectionRequestTwo.ClientGuid, connectionRequestTwo.MtuSize);
                 }
-                catch (InvalidOperationException e)
+                catch (InvalidOperationException)
                 {
                     MinecraftPeer peer = GetPeer<MinecraftPeer>(packet.EndPoint);
                     peer.Disconnect();

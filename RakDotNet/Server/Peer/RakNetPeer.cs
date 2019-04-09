@@ -16,11 +16,11 @@ namespace RakDotNet.Server.Peer
 
         public long ClientId { get; }
         public ushort MtuSize { get; }
-        public RakNetPeerState State { get; private set; } = RakNetPeerState.Connected;
+        public RakNetPeerState State { get; protected set; } = RakNetPeerState.Connected;
         public long TimeOut { get; set; } = 5000;
 
-        public uint SendSequenceNumber { get; private set; }
-        public uint ReceiveSequenceNumber { get; private set; }
+        public uint SendSequenceNumber { get; protected set; }
+        public uint ReceiveSequenceNumber { get; protected set; }
 
         public RakNetPeer(IPEndPoint endPoint, long clientId, ushort mtuSize)
         {
@@ -44,33 +44,12 @@ namespace RakDotNet.Server.Peer
             Server.Disconnect(PeerEndPoint);
         }
 
-        public virtual void HandleCustomPacket(CustomPacket packet)
+        public virtual void HandlePeerPacket(RakNetPacket packet)
         {
-            SendAck(packet.SequenceId);
-
-            Logger.Log(packet.PacketId);
         }
 
         public virtual void HandleEncapsulatedPacket(IPEndPoint endPoint, EncapsulatedPacket packet)
         {
-        }
-
-        public void SendAck(uint sequenceId)
-        {
-            AckPacket packet = (AckPacket) Server.Client.PacketIdentifier.GetPacketFormId(MinecraftServer.ACK);
-            packet.Records.Add(new Record(sequenceId));
-            packet.EndPoint = PeerEndPoint;
-
-            SendPacket(packet);
-        }
-
-        public void SendNack(uint sequenceId)
-        {
-            NackPacket packet = (NackPacket) Server.Client.PacketIdentifier.GetPacketFormId(MinecraftServer.NACK);
-            packet.Records.Add(new Record(sequenceId));
-            packet.EndPoint = PeerEndPoint;
-
-            SendPacket(packet);
         }
 
         public void SendPacket(RakNetPacket packet)
