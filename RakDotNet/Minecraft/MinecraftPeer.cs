@@ -51,12 +51,6 @@ namespace RakDotNet.Minecraft
 
         public override void HandleEncapsulatedPacket(EncapsulatedPacket packet)
         {
-            if (packet.Split)
-            {
-                HandleSplitEncapsulatedPacket(packet);
-                return;
-            }
-
             if (packet.Reliability.IsUnreliable())
             {
                 HandleConnectedPacket(packet);
@@ -78,12 +72,19 @@ namespace RakDotNet.Minecraft
                     }
                 }
 
+                if (packet.Split)
+                {
+                    HandleSplitEncapsulatedPacket(packet);
+                    return;
+                }
+
                 HandleConnectedPacket(packet);
             }
         }
 
         public void HandleSplitEncapsulatedPacket(EncapsulatedPacket packet)
         {
+            Logger.Log("Split");
             if (!SplitPackets.ContainsKey(packet.SplitId))
             {
                 SplitPackets.TryAdd(packet.SplitId, new ConcurrentDictionary<int, EncapsulatedPacket>());
@@ -111,8 +112,11 @@ namespace RakDotNet.Minecraft
                     stream.WriteBytes(buffer);
                 }
 
+                pk.Payload = stream.ToArray();
+
                 SplitPackets.TryRemove(pk.SplitId, out ConcurrentDictionary<int, EncapsulatedPacket> d);
 
+                Logger.Log("SplitBuilded");
                 HandleConnectedPacket(pk);
             }
         }
@@ -150,6 +154,7 @@ namespace RakDotNet.Minecraft
             }
             else if (State == RakNetPeerState.LoggedIn)
             {
+                Logger.Log(packet.MessageIndex);
                 HandleBatchPacket(packet);
             }
         }
