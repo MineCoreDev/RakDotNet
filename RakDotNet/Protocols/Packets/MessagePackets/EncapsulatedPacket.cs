@@ -23,6 +23,10 @@ namespace RakDotNet.Protocols.Packets.MessagePackets
 
         public byte[] Payload { get; set; }
 
+        public EncapsulatedPacket()
+        {
+        }
+
         public EncapsulatedPacket(CustomPacket packet)
         {
             byte flags = packet.ReadByte();

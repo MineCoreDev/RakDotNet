@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Net;
 using RakDotNet.Minecraft;
 using RakDotNet.Minecraft.Packets;
@@ -22,6 +24,13 @@ namespace RakDotNet.Server.Peer
         public uint SendSequenceNumber { get; protected set; }
         public uint ReceiveSequenceNumber { get; protected set; }
 
+        public uint StartMessageWindow { get; protected set; }
+        public uint EndMessageWindow { get; protected set; } = 2048;
+        public ConcurrentDictionary<uint, bool> MessageWindow { get; } = new ConcurrentDictionary<uint, bool>();
+
+        public ConcurrentDictionary<ushort, ConcurrentDictionary<int, EncapsulatedPacket>> SplitPackets =
+            new ConcurrentDictionary<ushort, ConcurrentDictionary<int, EncapsulatedPacket>>();
+
         public RakNetPeer(IPEndPoint endPoint, long clientId, ushort mtuSize)
         {
             PeerEndPoint = endPoint;
@@ -41,6 +50,7 @@ namespace RakDotNet.Server.Peer
 
         public virtual void Disconnect(string reason)
         {
+            Logger.Log(reason);
             Server.Disconnect(PeerEndPoint);
         }
 
@@ -48,7 +58,7 @@ namespace RakDotNet.Server.Peer
         {
         }
 
-        public virtual void HandleEncapsulatedPacket(IPEndPoint endPoint, EncapsulatedPacket packet)
+        public virtual void HandleEncapsulatedPacket(EncapsulatedPacket packet)
         {
         }
 

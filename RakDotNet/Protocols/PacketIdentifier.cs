@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using RakDotNet.Protocols.Packets;
 using RakDotNet.Protocols.Packets.ConnectionPackets;
+using RakDotNet.Protocols.Packets.LoginPackets;
 using RakDotNet.Protocols.Packets.PingPackets;
 
 namespace RakDotNet.Protocols
@@ -171,6 +172,11 @@ namespace RakDotNet.Protocols
             Register(OPEN_CONNECTION_REPLY_1, typeof(OpenConnectionReplyOne));
             Register(OPEN_CONNECTION_REQUEST_2, typeof(OpenConnectionRequestTwo));
             Register(OPEN_CONNECTION_REPLY_2, typeof(OpenConnectionReplyTwo));
+            Register(CONNECTION_REQUEST, typeof(ConnectionRequest));
+
+            Register(CONNECTION_REQUEST_ACCEPTED, typeof(ConnectionRequestAccepted));
+
+            Register(NEW_INCOMING_CONNECTION, typeof(NewIncomingConnection));
 
             CompileAll();
         }

@@ -1,8 +1,12 @@
+using System;
+using System.Collections.Concurrent;
 using System.Net;
+using RakDotNet.IO;
 using RakDotNet.Minecraft.Packets;
 using RakDotNet.Minecraft.Packets.Acknowledge;
 using RakDotNet.Protocols;
 using RakDotNet.Protocols.Packets;
+using RakDotNet.Protocols.Packets.LoginPackets;
 using RakDotNet.Protocols.Packets.MessagePackets;
 using RakDotNet.Server.Peer;
 using RakDotNet.Utils;
@@ -11,6 +15,9 @@ namespace RakDotNet.Minecraft
 {
     public class MinecraftPeer : RakNetPeer
     {
+        public Action<EncapsulatedPacket> HandleBatchPacket { private get; set; } =
+            (packet) => { };
+
         public MinecraftPeer(IPEndPoint endPoint, long clientId, ushort mtuSize) : base(endPoint, clientId, mtuSize)
         {
         }
@@ -37,16 +44,114 @@ namespace RakDotNet.Minecraft
 
                 for (int i = 0; i < packet.Packets.Length; i++)
                 {
-                    HandleEncapsulatedPacket(packet.EndPoint, packet.Packets[i]);
+                    HandleEncapsulatedPacket(packet.Packets[i]);
                 }
             }
         }
 
-        public override void HandleEncapsulatedPacket(IPEndPoint endPoint, EncapsulatedPacket packet)
+        public override void HandleEncapsulatedPacket(EncapsulatedPacket packet)
+        {
+            if (packet.Split)
+            {
+                HandleSplitEncapsulatedPacket(packet);
+                return;
+            }
+
+            if (packet.Reliability.IsUnreliable())
+            {
+                HandleConnectedPacket(packet);
+            }
+            else if (packet.Reliability.IsReliable())
+            {
+                if (packet.MessageIndex < StartMessageWindow ||
+                    packet.MessageIndex > EndMessageWindow || MessageWindow.ContainsKey(packet.MessageIndex))
+                    return;
+
+                MessageWindow.TryAdd(packet.MessageIndex, true);
+                if (packet.MessageIndex == StartMessageWindow)
+                {
+                    for (; MessageWindow.ContainsKey(StartMessageWindow); ++StartMessageWindow)
+                    {
+                        MessageWindow.TryRemove(StartMessageWindow, out bool v);
+
+                        ++EndMessageWindow;
+                    }
+                }
+
+                HandleConnectedPacket(packet);
+            }
+        }
+
+        public void HandleSplitEncapsulatedPacket(EncapsulatedPacket packet)
+        {
+            if (!SplitPackets.ContainsKey(packet.SplitId))
+            {
+                SplitPackets.TryAdd(packet.SplitId, new ConcurrentDictionary<int, EncapsulatedPacket>());
+                if (!SplitPackets[packet.SplitId].ContainsKey(packet.SplitIndex))
+                {
+                    SplitPackets[packet.SplitId].TryAdd(packet.SplitIndex, packet);
+                }
+            }
+            else
+            {
+                if (!SplitPackets[packet.SplitId].ContainsKey(packet.SplitIndex))
+                {
+                    SplitPackets[packet.SplitId].TryAdd(packet.SplitIndex, packet);
+                }
+            }
+
+            if (SplitPackets[packet.SplitId].Count == packet.SplitCount)
+            {
+                EncapsulatedPacket pk = new EncapsulatedPacket();
+                BinaryStream stream = new BinaryStream();
+                for (int i = 0; i < packet.SplitCount; ++i)
+                {
+                    EncapsulatedPacket p = SplitPackets[packet.SplitId][i];
+                    byte[] buffer = pk.Payload;
+                    stream.WriteBytes(buffer);
+                }
+
+                SplitPackets.TryRemove(pk.SplitId, out ConcurrentDictionary<int, EncapsulatedPacket> d);
+
+                HandleConnectedPacket(pk);
+            }
+        }
+
+        public void HandleConnectedPacket(EncapsulatedPacket packet)
         {
             byte[] buffer = packet.Payload;
             RakNetPacket pk = Server.Client.PacketIdentifier.GetPacketFormId(buffer[0]);
             pk.SetBuffer(buffer);
+
+            pk.DecodeHeader();
+            pk.DecodePayload();
+
+            Logger.Log(buffer[0]);
+            if (pk is ConnectionRequest connectionRequest && State == RakNetPeerState.Connected)
+            {
+                ConnectionRequestAccepted accepted = new ConnectionRequestAccepted();
+                accepted.PeerAddress = PeerEndPoint;
+                accepted.ClientTimestamp = connectionRequest.Timestamp;
+                accepted.ServerTimestamp = TimeSpan.FromTicks(Environment.TickCount);
+                accepted.EndPoint = PeerEndPoint;
+                SendEncapsulatedPacket(accepted, Reliability.Unreliable, 0);
+
+                State = RakNetPeerState.Handshaking;
+            }
+            else if (pk is NewIncomingConnection connection && State == RakNetPeerState.Handshaking)
+            {
+                if (connection.RemoteServerAddress.Port != Server.Client.EndPoint.Port)
+                {
+                    Disconnect("port miss match.");
+                    return;
+                }
+
+                State = RakNetPeerState.LoggedIn;
+            }
+            else if (State == RakNetPeerState.LoggedIn)
+            {
+                HandleBatchPacket(packet);
+            }
         }
 
         public void SendAck(uint sequenceId)
@@ -65,6 +170,24 @@ namespace RakDotNet.Minecraft
             packet.EndPoint = PeerEndPoint;
 
             SendPacket(packet);
+        }
+
+        public void SendEncapsulatedPacket(RakNetPacket packet, Reliability reliability, byte flags)
+        {
+            packet.EncodeHeader();
+            packet.EncodePayload();
+
+            CustomPacket pk =
+                Server.Client.PacketIdentifier.GetPacketFormId(MinecraftServer.CUSTOM_PACKET_4) as CustomPacket;
+
+            EncapsulatedPacket encapsulatedPacket = new EncapsulatedPacket();
+            encapsulatedPacket.Reliability = reliability;
+            encapsulatedPacket.Payload = packet.GetBuffer();
+
+            pk.SequenceId = ReceiveSequenceNumber++;
+            pk.Packets = new[] {encapsulatedPacket};
+            pk.EndPoint = packet.EndPoint;
+            Server.Client.SendPacket(pk);
         }
     }
 }

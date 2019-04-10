@@ -3,6 +3,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using RakDotNet.Event;
+using RakDotNet.Event.RakNetClientEvents;
 using RakDotNet.IO;
 using RakDotNet.Protocols;
 using RakDotNet.Protocols.Packets;
@@ -25,6 +27,11 @@ namespace RakDotNet
 
         public Action<RakNetPacket> OnReceive { private get; set; }
 
+        public event EventHandler<ClientStartWorkerEventArgs> StartWorkerEvent;
+        public event EventHandler<ClientStopWorkerEventArgs> StopWorkerEvent;
+        public event EventHandler<ClientPacketSendEventArgs> SendPacketEvent;
+        public event EventHandler<ClientPacketReceiveEventArgs> ReceivePacketEvent;
+
         public RakNetClient(IPEndPoint endPoint) : base(endPoint)
         {
             EndPoint = endPoint;
@@ -39,6 +46,9 @@ namespace RakDotNet
 
         public void StartReceiveWorker()
         {
+            new ClientStartWorkerEventArgs(this)
+                .Invoke(this, StartWorkerEvent);
+
             WorkerCancelToken = new CancellationTokenSource();
             NetworkWorker = Task.Factory.StartNew(async () =>
             {
@@ -46,6 +56,9 @@ namespace RakDotNet
                 {
                     if (WorkerCancelToken.IsCancellationRequested)
                     {
+                        new ClientStopWorkerEventArgs(this)
+                            .Invoke(this, StopWorkerEvent);
+
                         Logger.Debug($"{NetworkWorker.Id} is Canceled.");
                         WorkerCancelToken.Token.ThrowIfCancellationRequested();
                     }
@@ -78,8 +91,12 @@ namespace RakDotNet
             }
             catch (Exception e)
             {
+                Logger.Log(packet.Length);
                 throw new PacketDecodeException(e.Message);
             }
+
+            new ClientPacketReceiveEventArgs(this, packet, DownloadBytes)
+                .Invoke(this, ReceivePacketEvent);
 
             return packet;
         }
@@ -107,6 +124,10 @@ namespace RakDotNet
 
             byte[] buf = packet.GetBuffer();
             UploadBytes += (ulong) await SendAsync(buf, buf.Length, packet.EndPoint);
+
+            new ClientPacketSendEventArgs(this, packet, UploadBytes)
+                .Invoke(this, SendPacketEvent);
+
             packet.Close();
         }
 

@@ -8,6 +8,6 @@ namespace RakDotNet.Server.Peer
     public interface IRakNetPeerPacketHandler
     {
         void HandlePeerPacket(RakNetPacket packet);
-        void HandleEncapsulatedPacket(IPEndPoint endPoint, EncapsulatedPacket packet);
+        void HandleEncapsulatedPacket(EncapsulatedPacket packet);
     }
 }
