@@ -50,7 +50,7 @@ namespace RakDotNet.Server.Peer
 
         public virtual void Disconnect(string reason)
         {
-            Logger.Log(reason);
+            Logger.Info(reason);
             Server.Disconnect(PeerEndPoint);
         }
 

@@ -15,41 +15,45 @@ namespace RakDotNet.Minecraft.Packets.Acknowledge
             {
                 Record record = records[i];
                 if (!record.IsRanged())
-                {
                     rebuildList.Add(record.StartIndex);
-                }
                 else
                     throw new InvalidOperationException("records sorted.");
             }
 
             rebuildList.Sort();
 
-            List<Record> buildRecords = new List<Record>();
-            uint start = 0;
-            uint end = 0;
-            uint current = 0;
-            int index = 0;
+            List<Record> result = new List<Record>();
+            int pointer = 1;
+            uint start = rebuildList[0];
+            uint last = rebuildList[0];
 
-            while (index < rebuildList.Count - 1)
+            while (pointer < records.Length)
             {
-                start = rebuildList[index];
-                for (int i = index; i < rebuildList.Count; i++)
+                uint current = rebuildList[pointer++];
+                uint diff = current - last;
+                if (diff == 1)
+                    last = current;
+                else if (diff > 1)
                 {
-                    current = rebuildList[i];
-                    if (rebuildList[i + 1] - 1 != current)
+                    if (start == last)
                     {
-                        end = current;
-                        break;
+                        result.Add(new Record(start));
+                        start = last = current;
+                    }
+                    else
+                    {
+                        result.Add(new Record(start, last));
+                        start = last = current;
                     }
                 }
-
-                if (start == end)
-                    buildRecords.Add(new Record(start));
-                else
-                    buildRecords.Add(new Record(start, end));
             }
 
-            return buildRecords;
+            if (start == last)
+                result.Add(new Record(start));
+            else
+                result.Add(new Record(start, last));
+
+            return result;
         }
 
         public Record(uint index)

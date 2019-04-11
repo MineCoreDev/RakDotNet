@@ -59,7 +59,7 @@ namespace RakDotNet
                         new ClientStopWorkerEventArgs(this)
                             .Invoke(this, StopWorkerEvent);
 
-                        Logger.Debug($"{NetworkWorker.Id} is Canceled.");
+                        Logger.Info($"{NetworkWorker.Id} is Canceled.");
                         WorkerCancelToken.Token.ThrowIfCancellationRequested();
                     }
 
@@ -91,8 +91,7 @@ namespace RakDotNet
             }
             catch (Exception e)
             {
-                Logger.Log(packet.Length);
-                throw new PacketDecodeException(e.Message);
+                throw new PacketDecodeException(e.Message, e);
             }
 
             new ClientPacketReceiveEventArgs(this, packet, DownloadBytes)
@@ -119,7 +118,7 @@ namespace RakDotNet
             }
             catch (Exception e)
             {
-                throw new PacketEncodeException(e.Message);
+                throw new PacketEncodeException(e.Message, e);
             }
 
             byte[] buf = packet.GetBuffer();

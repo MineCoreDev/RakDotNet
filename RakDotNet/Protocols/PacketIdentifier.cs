@@ -164,8 +164,11 @@ namespace RakDotNet.Protocols
         {
             Reset();
 
+            Register(CONNECTED_PING, typeof(ConnectedPing));
             Register(UNCONNECTED_PING, typeof(UnconnectedPing));
             Register(UNCONNECTED_PING_OPEN_CONNECTIONS, typeof(UnconnectedPingOpenConnections));
+            Register(CONNECTED_PONG, typeof(ConnectedPong));
+
             Register(UNCONNECTED_PONG, typeof(UnconnectedPong));
 
             Register(OPEN_CONNECTION_REQUEST_1, typeof(OpenConnectionRequestOne));
@@ -174,6 +177,7 @@ namespace RakDotNet.Protocols
             Register(OPEN_CONNECTION_REPLY_2, typeof(OpenConnectionReplyTwo));
             Register(CONNECTION_REQUEST, typeof(ConnectionRequest));
 
+            Register(DISCONNECTION_NOTIFICATION, typeof(DisconnectionNotification));
             Register(CONNECTION_REQUEST_ACCEPTED, typeof(ConnectionRequestAccepted));
 
             Register(NEW_INCOMING_CONNECTION, typeof(NewIncomingConnection));

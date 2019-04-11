@@ -6,8 +6,10 @@ using RakDotNet.Minecraft.Packets;
 using RakDotNet.Minecraft.Packets.Acknowledge;
 using RakDotNet.Protocols;
 using RakDotNet.Protocols.Packets;
+using RakDotNet.Protocols.Packets.ConnectionPackets;
 using RakDotNet.Protocols.Packets.LoginPackets;
 using RakDotNet.Protocols.Packets.MessagePackets;
+using RakDotNet.Protocols.Packets.PingPackets;
 using RakDotNet.Server.Peer;
 using RakDotNet.Utils;
 
@@ -84,7 +86,6 @@ namespace RakDotNet.Minecraft
 
         public void HandleSplitEncapsulatedPacket(EncapsulatedPacket packet)
         {
-            Logger.Log(packet.GetPacketSize());
             if (!SplitPackets.ContainsKey(packet.SplitId))
             {
                 SplitPackets.TryAdd(packet.SplitId, new ConcurrentDictionary<int, EncapsulatedPacket>());
@@ -150,6 +151,17 @@ namespace RakDotNet.Minecraft
 
                 State = RakNetPeerState.LoggedIn;
             }
+            else if (pk is ConnectedPing)
+            {
+                ConnectedPong pong = new ConnectedPong();
+                pong.Timestamp = TimeSpan.FromTicks(Environment.TickCount);
+                pong.EndPoint = PeerEndPoint;
+                SendEncapsulatedPacket(pong, Reliability.Unreliable, 0);
+            }
+            else if (pk is DisconnectionNotification)
+            {
+                Disconnect();
+            }
             else if (State == RakNetPeerState.LoggedIn)
             {
                 HandleBatchPacket(packet);
@@ -186,10 +198,16 @@ namespace RakDotNet.Minecraft
             encapsulatedPacket.Reliability = reliability;
             encapsulatedPacket.Payload = packet.GetBuffer();
 
-            pk.SequenceId = ReceiveSequenceNumber++;
+            pk.SequenceId = SendSequenceNumber++;
             pk.Packets = new[] {encapsulatedPacket};
             pk.EndPoint = packet.EndPoint;
             Server.Client.SendPacket(pk);
+        }
+
+        public override void Disconnect(string reason)
+        {
+            SendEncapsulatedPacket(new DisconnectionNotification(), Reliability.Unreliable, 0);
+            Server.Disconnect(PeerEndPoint);
         }
     }
 }

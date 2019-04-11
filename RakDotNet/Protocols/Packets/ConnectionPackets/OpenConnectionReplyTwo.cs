@@ -14,16 +14,16 @@ namespace RakDotNet.Protocols.Packets.ConnectionPackets
         {
             WriteMagic();
             WriteLong(ServerGuid);
-            WriteBoolean(EncryptionEnabled);
             WriteUShort(MtuSize);
+            WriteBoolean(EncryptionEnabled);
         }
 
         public override void DecodePayload()
         {
             CheckMagic();
             ServerGuid = ReadLong();
-            EncryptionEnabled = ReadBoolean();
             MtuSize = ReadUShort();
+            EncryptionEnabled = ReadBoolean();
         }
     }
 }

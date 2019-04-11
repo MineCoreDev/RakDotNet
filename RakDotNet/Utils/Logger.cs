@@ -15,9 +15,9 @@ namespace RakDotNet.Utils
             PrintCallBack(new SimpleLog("Debug", message.ToString(), Environment.StackTrace));
         }
 
-        internal static void Log(object message)
+        internal static void Info(object message)
         {
-            PrintCallBack(new SimpleLog("Log", message.ToString(), Environment.StackTrace));
+            PrintCallBack(new SimpleLog("Info", message.ToString(), Environment.StackTrace));
         }
 
         internal static void Warn(object message)
