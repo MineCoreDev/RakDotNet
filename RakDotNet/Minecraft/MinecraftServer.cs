@@ -34,6 +34,8 @@ namespace RakDotNet.Minecraft
         public const int ACK = 0xC0;
         public const int NACK = 0xA0;
 
+        public const int BATCH_PACKET = 0xFE;
+
         public String ServerListData { get; set; } = String.Empty;
 
         public MinecraftServer(IPEndPoint endPoint) : base(endPoint)
@@ -131,6 +133,8 @@ namespace RakDotNet.Minecraft
 
             identifier.Register(ACK, typeof(AckPacket));
             identifier.Register(NACK, typeof(NackPacket));
+
+            identifier.Register(BATCH_PACKET, typeof(BatchPacket));
 
             identifier.CompileAll();
         }

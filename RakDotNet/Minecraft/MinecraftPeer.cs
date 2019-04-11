@@ -160,7 +160,7 @@ namespace RakDotNet.Minecraft
             }
             else if (pk is DisconnectionNotification)
             {
-                Disconnect();
+                Disconnect("client disconnect.");
             }
             else if (State == RakNetPeerState.LoggedIn)
             {
@@ -206,6 +206,7 @@ namespace RakDotNet.Minecraft
 
         public override void Disconnect(string reason)
         {
+            Logger.Info(reason);
             SendEncapsulatedPacket(new DisconnectionNotification(), Reliability.Unreliable, 0);
             Server.Disconnect(PeerEndPoint);
         }
