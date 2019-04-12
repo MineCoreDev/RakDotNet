@@ -21,11 +21,14 @@ namespace RakDotNet.Server.Peer
         public RakNetPeerState State { get; protected set; } = RakNetPeerState.Connected;
         public long TimeOut { get; set; } = 5000;
 
+        public long LastPingTime { get; set; } = 0;
+
         public uint SendSequenceNumber { get; protected set; }
         public uint ReceiveSequenceNumber { get; protected set; }
 
         public uint StartMessageWindow { get; protected set; }
         public uint EndMessageWindow { get; protected set; } = 2048;
+
         public ConcurrentDictionary<uint, bool> MessageWindow { get; } = new ConcurrentDictionary<uint, bool>();
 
         public ConcurrentDictionary<ushort, ConcurrentDictionary<int, EncapsulatedPacket>> SplitPackets =
@@ -60,6 +63,15 @@ namespace RakDotNet.Server.Peer
 
         public virtual void HandleEncapsulatedPacket(EncapsulatedPacket packet)
         {
+        }
+
+        public void Update()
+        {
+            TimeSpan span = TimeSpan.FromTicks(Environment.TickCount);
+            if (span.TotalMilliseconds - LastPingTime > TimeOut)
+            {
+                Disconnect("timed out.");
+            }
         }
 
         public void SendPacket(RakNetPacket packet)

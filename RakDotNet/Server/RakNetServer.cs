@@ -2,10 +2,13 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 using RakDotNet.IO;
 using RakDotNet.Protocols;
 using RakDotNet.Protocols.Packets;
 using RakDotNet.Server.Peer;
+using RakDotNet.Utils;
 
 namespace RakDotNet.Server
 {
@@ -18,6 +21,9 @@ namespace RakDotNet.Server
 
         public long Guid { get; private set; }
         public long PongId { get; private set; }
+
+        public Task ServerWorker { get; private set; }
+        public CancellationTokenSource WorkerCancelToken { get; private set; }
 
         public RakNetServer(IPEndPoint endPoint)
         {
@@ -33,8 +39,32 @@ namespace RakDotNet.Server
 
         public void Start()
         {
+            StartServerWorker();
             Client.StartReceiveWorker();
             Client.OnReceive = HandleRakNetPacket;
+        }
+
+        public void StartServerWorker()
+        {
+            WorkerCancelToken = new CancellationTokenSource();
+            ServerWorker = Task.Factory.StartNew(async () =>
+            {
+                while (true)
+                {
+                    if (WorkerCancelToken.IsCancellationRequested)
+                    {
+                        Logger.Info($"{ServerWorker.Id} is Canceled.");
+                        WorkerCancelToken.Token.ThrowIfCancellationRequested();
+                    }
+
+                    foreach (RakNetPeer peer in _connectedPeers.Values)
+                    {
+                        peer.Update();
+                    }
+
+                    await Task.Delay(1);
+                }
+            }, WorkerCancelToken.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
 
         public T GetPeer<T>(IPEndPoint endPoint) where T : RakNetPeer

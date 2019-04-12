@@ -17,8 +17,8 @@ namespace RakDotNet.Minecraft
 {
     public class MinecraftPeer : RakNetPeer
     {
-        public Action<EncapsulatedPacket> HandleBatchPacket { private get; set; } =
-            (packet) => { };
+        public Action<BatchPacket> HandleBatchPacket { private get; set; } =
+            packet => { };
 
         public MinecraftPeer(IPEndPoint endPoint, long clientId, ushort mtuSize) : base(endPoint, clientId, mtuSize)
         {
@@ -156,15 +156,18 @@ namespace RakDotNet.Minecraft
                 ConnectedPong pong = new ConnectedPong();
                 pong.Timestamp = TimeSpan.FromTicks(Environment.TickCount);
                 pong.EndPoint = PeerEndPoint;
+
+                LastPingTime = (long) pong.Timestamp.TotalMilliseconds;
+
                 SendEncapsulatedPacket(pong, Reliability.Unreliable, 0);
             }
             else if (pk is DisconnectionNotification)
             {
                 Disconnect("client disconnect.");
             }
-            else if (State == RakNetPeerState.LoggedIn)
+            else if (pk is BatchPacket batchPacket && State == RakNetPeerState.LoggedIn)
             {
-                HandleBatchPacket(packet);
+                HandleBatchPacket(batchPacket);
             }
         }
 

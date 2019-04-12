@@ -71,6 +71,8 @@ namespace RakDotNet
                     {
                         Logger.Warn(e);
                     }
+
+                    await Task.Delay(1);
                 }
             }, WorkerCancelToken.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
