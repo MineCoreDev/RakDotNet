@@ -5,11 +5,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using RakDotNet.Event;
 using RakDotNet.Event.RakNetClientEvents;
-using RakDotNet.IO;
 using RakDotNet.Protocols;
 using RakDotNet.Protocols.Packets;
 using RakDotNet.Utils;
-using NetworkStream = RakDotNet.IO.NetworkStream;
+using NetworkStream = BinaryIO.NetworkStream;
 
 namespace RakDotNet
 {

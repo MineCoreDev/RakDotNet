@@ -1,5 +1,5 @@
 using System.Net;
-using RakDotNet.IO;
+using BinaryIO;
 
 namespace RakDotNet.Protocols
 {

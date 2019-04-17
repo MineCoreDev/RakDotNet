@@ -9,4 +9,8 @@
       <ProjectReference Include="..\RakDotNet\RakDotNet.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="BinaryIO" Version="1.0.0" />
+    </ItemGroup>
+
 </Project>

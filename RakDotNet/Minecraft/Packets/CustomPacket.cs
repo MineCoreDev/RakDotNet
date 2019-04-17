@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
-using RakDotNet.IO;
-using RakDotNet.Protocols;
+using BinaryIO;
 using RakDotNet.Protocols.Packets;
 using RakDotNet.Protocols.Packets.MessagePackets;
-using RakDotNet.Server;
-using RakDotNet.Utils;
 
 namespace RakDotNet.Minecraft.Packets
 {

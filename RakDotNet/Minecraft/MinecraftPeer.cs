@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.Net;
-using RakDotNet.IO;
+using BinaryIO;
 using RakDotNet.Minecraft.Packets;
 using RakDotNet.Minecraft.Packets.Acknowledge;
-using RakDotNet.Protocols;
 using RakDotNet.Protocols.Packets;
 using RakDotNet.Protocols.Packets.ConnectionPackets;
 using RakDotNet.Protocols.Packets.LoginPackets;

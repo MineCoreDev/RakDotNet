@@ -1,4 +1,4 @@
-using RakDotNet.IO;
+using BinaryIO;
 using RakDotNet.Minecraft.Packets;
 
 namespace RakDotNet.Protocols.Packets.MessagePackets

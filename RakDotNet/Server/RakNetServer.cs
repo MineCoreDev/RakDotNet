@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using RakDotNet.IO;
+using BinaryIO;
 using RakDotNet.Protocols;
 using RakDotNet.Protocols.Packets;
 using RakDotNet.Server.Peer;

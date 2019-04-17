@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using RakDotNet.IO;
+using BinaryIO;
 using RakDotNet.Protocols.Packets;
 
 namespace RakDotNet.Minecraft.Packets.Acknowledge
