@@ -17,7 +17,7 @@ namespace RakDotNet.Server
         private ConcurrentDictionary<IPEndPoint, RakNetPeer> _connectedPeers =
             new ConcurrentDictionary<IPEndPoint, RakNetPeer>();
 
-        public RakNetClient Client { get; }
+        public RakNetSocket Socket { get; }
 
         public long Guid { get; private set; }
         public long PongId { get; private set; }
@@ -27,21 +27,21 @@ namespace RakDotNet.Server
 
         public RakNetServer(IPEndPoint endPoint)
         {
-            Client = new RakNetClient(endPoint);
+            Socket = new RakNetSocket(endPoint);
             Init();
         }
 
         public RakNetServer(IPEndPoint endPoint, PacketIdentifier identifier)
         {
-            Client = new RakNetClient(endPoint, identifier);
+            Socket = new RakNetSocket(endPoint, identifier);
             Init();
         }
 
         public void Start()
         {
             StartServerWorker();
-            Client.StartReceiveWorker();
-            Client.OnReceive = HandleRakNetPacket;
+            Socket.StartReceiveWorker();
+            Socket.OnReceive = HandleRakNetPacket;
         }
 
         public void StartServerWorker()

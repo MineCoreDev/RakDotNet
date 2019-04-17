@@ -2,7 +2,7 @@ namespace RakDotNet.Event.RakNetClientEvents
 {
     public class ClientStopWorkerEventArgs : RakNetClientEventArgs
     {
-        public ClientStopWorkerEventArgs(RakNetClient client) : base(client)
+        public ClientStopWorkerEventArgs(RakNetSocket socket) : base(socket)
         {
         }
     }

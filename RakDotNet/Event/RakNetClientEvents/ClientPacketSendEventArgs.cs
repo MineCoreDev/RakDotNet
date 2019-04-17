@@ -7,7 +7,7 @@ namespace RakDotNet.Event.RakNetClientEvents
         public RakNetPacket SendPacket { get; }
         public ulong SendBytes { get; }
 
-        public ClientPacketSendEventArgs(RakNetClient client, RakNetPacket packet, ulong bytes) : base(client)
+        public ClientPacketSendEventArgs(RakNetSocket socket, RakNetPacket packet, ulong bytes) : base(socket)
         {
             SendPacket = packet;
             SendBytes = bytes;

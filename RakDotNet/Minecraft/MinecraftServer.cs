@@ -58,12 +58,12 @@ namespace RakDotNet.Minecraft
             else if (packet is UnconnectedPing unconnectedPing)
             {
                 UnconnectedPong pong =
-                    (UnconnectedPong) Client.PacketIdentifier.GetPacketFormId(PacketIdentifier.UNCONNECTED_PONG);
+                    (UnconnectedPong) Socket.PacketIdentifier.GetPacketFormId(PacketIdentifier.UNCONNECTED_PONG);
                 pong.TimeStamp = TimeSpan.FromMilliseconds(Environment.TickCount);
                 pong.PongId = PongId;
                 pong.Identifier = ServerListData;
                 pong.EndPoint = unconnectedPing.EndPoint;
-                Client.SendPacket(pong);
+                Socket.SendPacketAsync(pong);
             }
             else if (packet is OpenConnectionRequestOne connectionRequestOne)
             {
@@ -71,16 +71,16 @@ namespace RakDotNet.Minecraft
                     throw new ProtocolViolationException($"protocol number {connectionRequestOne.Protocol} not found.");
 
                 OpenConnectionReplyOne replyOne =
-                    (OpenConnectionReplyOne) Client.PacketIdentifier.GetPacketFormId(PacketIdentifier
+                    (OpenConnectionReplyOne) Socket.PacketIdentifier.GetPacketFormId(PacketIdentifier
                         .OPEN_CONNECTION_REPLY_1);
                 replyOne.MtuSize = connectionRequestOne.MtuSize;
                 replyOne.ServerGuid = Guid;
                 replyOne.EndPoint = connectionRequestOne.EndPoint;
-                Client.SendPacket(replyOne);
+                Socket.SendPacketAsync(replyOne);
             }
             else if (packet is OpenConnectionRequestTwo connectionRequestTwo)
             {
-                if (Client.EndPoint.Port != connectionRequestTwo.ConnectionEndPoint.Port)
+                if (Socket.EndPoint.Port != connectionRequestTwo.ConnectionEndPoint.Port)
                     throw new InvalidOperationException("connection port is not match.");
 
                 try
@@ -95,12 +95,12 @@ namespace RakDotNet.Minecraft
                 }
 
                 OpenConnectionReplyTwo replyTwo =
-                    (OpenConnectionReplyTwo) Client.PacketIdentifier.GetPacketFormId(PacketIdentifier
+                    (OpenConnectionReplyTwo) Socket.PacketIdentifier.GetPacketFormId(PacketIdentifier
                         .OPEN_CONNECTION_REPLY_2);
                 replyTwo.MtuSize = connectionRequestTwo.MtuSize;
                 replyTwo.ServerGuid = Guid;
                 replyTwo.EndPoint = connectionRequestTwo.EndPoint;
-                Client.SendPacket(replyTwo);
+                Socket.SendPacketAsync(replyTwo);
             }
         }
 
@@ -113,7 +113,7 @@ namespace RakDotNet.Minecraft
 
         private void RegisterMinecraftDefaults()
         {
-            PacketIdentifier identifier = Client.PacketIdentifier;
+            PacketIdentifier identifier = Socket.PacketIdentifier;
             identifier.Register(CUSTOM_PACKET_0, typeof(CustomPacket));
             identifier.Register(CUSTOM_PACKET_1, typeof(CustomPacket));
             identifier.Register(CUSTOM_PACKET_2, typeof(CustomPacket));

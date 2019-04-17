@@ -12,7 +12,7 @@ using NetworkStream = BinaryIO.NetworkStream;
 
 namespace RakDotNet
 {
-    public class RakNetClient : UdpClient
+    public class RakNetSocket : UdpClient
     {
         public PacketIdentifier PacketIdentifier { get; }
 
@@ -31,13 +31,13 @@ namespace RakDotNet
         public event EventHandler<ClientPacketSendEventArgs> SendPacketEvent;
         public event EventHandler<ClientPacketReceiveEventArgs> ReceivePacketEvent;
 
-        public RakNetClient(IPEndPoint endPoint) : base(endPoint)
+        public RakNetSocket(IPEndPoint endPoint) : base(endPoint)
         {
             EndPoint = endPoint;
             PacketIdentifier = new PacketIdentifier();
         }
 
-        public RakNetClient(IPEndPoint endPoint, PacketIdentifier identifier) : base(endPoint)
+        public RakNetSocket(IPEndPoint endPoint, PacketIdentifier identifier) : base(endPoint)
         {
             EndPoint = endPoint;
             PacketIdentifier = identifier;
@@ -64,7 +64,7 @@ namespace RakDotNet
 
                     try
                     {
-                        OnReceive?.Invoke(await ReceivePacket());
+                        OnReceive?.Invoke(await ReceivePacketAsync());
                     }
                     catch (Exception e)
                     {
@@ -76,7 +76,53 @@ namespace RakDotNet
             }, WorkerCancelToken.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
 
-        public async Task<RakNetPacket> ReceivePacket()
+        public RakNetPacket ReceivePacket()
+        {
+            IPEndPoint endPoint = null;
+            byte[] buffer = Receive(ref endPoint);
+            RakNetPacket packet = PacketIdentifier.GetPacketFormId(buffer[0]);
+            packet.SetBuffer(buffer);
+            packet.EndPoint = endPoint;
+            DownloadBytes += (uint) buffer.Length;
+
+            try
+            {
+                packet.DecodeHeader();
+                packet.DecodePayload();
+            }
+            catch (Exception e)
+            {
+                throw new PacketDecodeException(e.Message, e);
+            }
+
+            new ClientPacketReceiveEventArgs(this, packet, DownloadBytes)
+                .Invoke(this, ReceivePacketEvent);
+
+            return packet;
+        }
+
+        public void SendPacket(RakNetPacket packet)
+        {
+            try
+            {
+                packet.EncodeHeader();
+                packet.EncodePayload();
+            }
+            catch (Exception e)
+            {
+                throw new PacketEncodeException(e.Message, e);
+            }
+
+            byte[] buf = packet.GetBuffer();
+            UploadBytes += (ulong) Send(buf, buf.Length, packet.EndPoint);
+
+            new ClientPacketSendEventArgs(this, packet, UploadBytes)
+                .Invoke(this, SendPacketEvent);
+
+            packet.Close();
+        }
+
+        public async Task<RakNetPacket> ReceivePacketAsync()
         {
             UdpReceiveResult result = await ReceiveAsync();
             byte[] buffer = result.Buffer;
@@ -101,16 +147,7 @@ namespace RakDotNet
             return packet;
         }
 
-        public async Task<RawPacket> ReceiveRawPacket()
-        {
-            UdpReceiveResult result = await ReceiveAsync();
-            byte[] buffer = result.Buffer;
-            NetworkStream stream = new NetworkStream(buffer);
-            DownloadBytes += (uint) buffer.Length;
-            return new RawPacket(result.RemoteEndPoint, stream);
-        }
-
-        public async void SendPacket(RakNetPacket packet)
+        public async void SendPacketAsync(RakNetPacket packet)
         {
             try
             {
@@ -131,7 +168,16 @@ namespace RakDotNet
             packet.Close();
         }
 
-        public async void SendRawPacket(RawPacket packet)
+        public async Task<RawPacket> ReceiveRawPacketAsync()
+        {
+            UdpReceiveResult result = await ReceiveAsync();
+            byte[] buffer = result.Buffer;
+            NetworkStream stream = new NetworkStream(buffer);
+            DownloadBytes += (uint) buffer.Length;
+            return new RawPacket(result.RemoteEndPoint, stream);
+        }
+
+        public async void SendRawPacketAsync(RawPacket packet)
         {
             NetworkStream stream = packet.Stream;
             UploadBytes += (ulong) await SendAsync(stream.GetBuffer(), (int) stream.Length, packet.EndPoint);

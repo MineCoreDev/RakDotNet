@@ -12,9 +12,9 @@ namespace RakDotNet.Tests
         [Test]
         public void StartRakNetClient()
         {
-            RakNetClient client = RakNet.CreateClient(new IPEndPoint(IPAddress.Any, 19132));
+            RakNetSocket socket = RakNet.CreateClient(new IPEndPoint(IPAddress.Any, 19132));
             //client.OnReceive = packet => { Console.WriteLine(packet.ReadByte()); };
-            RakNetPacket p = client.ReceivePacket().GetAwaiter().GetResult();
+            RakNetPacket p = socket.ReceivePacketAsync().GetAwaiter().GetResult();
             if (p is UnconnectedPing unconnectedPing)
             {
                 Console.WriteLine(p.PacketId);

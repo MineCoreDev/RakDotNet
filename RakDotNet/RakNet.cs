@@ -37,9 +37,9 @@ namespace RakDotNet
             return await _natDevice.GetSpecificMappingAsync(Protocol.Udp, port) != null;
         }
 
-        public static RakNetClient CreateClient(IPEndPoint endPoint)
+        public static RakNetSocket CreateClient(IPEndPoint endPoint)
         {
-            return new RakNetClient(endPoint);
+            return new RakNetSocket(endPoint);
         }
 
         private static async void InitNatDevice()

@@ -21,6 +21,7 @@ namespace RakDotNet.Minecraft
 
         public MinecraftPeer(IPEndPoint endPoint, long clientId, ushort mtuSize) : base(endPoint, clientId, mtuSize)
         {
+            LastPingTime = (long) TimeSpan.FromMilliseconds(Environment.TickCount).TotalMilliseconds;
         }
 
         public override void HandlePeerPacket(RakNetPacket packet)
@@ -123,7 +124,7 @@ namespace RakDotNet.Minecraft
         public void HandleConnectedPacket(EncapsulatedPacket packet)
         {
             byte[] buffer = packet.Payload;
-            RakNetPacket pk = Server.Client.PacketIdentifier.GetPacketFormId(buffer[0]);
+            RakNetPacket pk = Server.Socket.PacketIdentifier.GetPacketFormId(buffer[0]);
             pk.SetBuffer(buffer);
 
             pk.DecodeHeader();
@@ -134,7 +135,7 @@ namespace RakDotNet.Minecraft
                 ConnectionRequestAccepted accepted = new ConnectionRequestAccepted();
                 accepted.PeerAddress = PeerEndPoint;
                 accepted.ClientTimestamp = connectionRequest.Timestamp;
-                accepted.ServerTimestamp = TimeSpan.FromTicks(Environment.TickCount);
+                accepted.ServerTimestamp = TimeSpan.FromMilliseconds(Environment.TickCount);
                 accepted.EndPoint = PeerEndPoint;
                 SendEncapsulatedPacket(accepted, Reliability.Unreliable, 0);
 
@@ -142,7 +143,7 @@ namespace RakDotNet.Minecraft
             }
             else if (pk is NewIncomingConnection connection && State == RakNetPeerState.Handshaking)
             {
-                if (connection.RemoteServerAddress.Port != Server.Client.EndPoint.Port)
+                if (connection.RemoteServerAddress.Port != Server.Socket.EndPoint.Port)
                 {
                     Disconnect("port miss match.");
                     return;
@@ -153,7 +154,7 @@ namespace RakDotNet.Minecraft
             else if (pk is ConnectedPing)
             {
                 ConnectedPong pong = new ConnectedPong();
-                pong.Timestamp = TimeSpan.FromTicks(Environment.TickCount);
+                pong.Timestamp = TimeSpan.FromMilliseconds(Environment.TickCount);
                 pong.EndPoint = PeerEndPoint;
 
                 LastPingTime = (long) pong.Timestamp.TotalMilliseconds;
@@ -172,7 +173,7 @@ namespace RakDotNet.Minecraft
 
         public void SendAck(uint sequenceId)
         {
-            AckPacket packet = (AckPacket) Server.Client.PacketIdentifier.GetPacketFormId(MinecraftServer.ACK);
+            AckPacket packet = (AckPacket) Server.Socket.PacketIdentifier.GetPacketFormId(MinecraftServer.ACK);
             packet.Records.Add(new Record(sequenceId));
             packet.EndPoint = PeerEndPoint;
 
@@ -181,7 +182,7 @@ namespace RakDotNet.Minecraft
 
         public void SendNack(uint sequenceId)
         {
-            NackPacket packet = (NackPacket) Server.Client.PacketIdentifier.GetPacketFormId(MinecraftServer.NACK);
+            NackPacket packet = (NackPacket) Server.Socket.PacketIdentifier.GetPacketFormId(MinecraftServer.NACK);
             packet.Records.Add(new Record(sequenceId));
             packet.EndPoint = PeerEndPoint;
 
@@ -194,7 +195,7 @@ namespace RakDotNet.Minecraft
             packet.EncodePayload();
 
             CustomPacket pk =
-                Server.Client.PacketIdentifier.GetPacketFormId(MinecraftServer.CUSTOM_PACKET_4) as CustomPacket;
+                Server.Socket.PacketIdentifier.GetPacketFormId(MinecraftServer.CUSTOM_PACKET_4) as CustomPacket;
 
             EncapsulatedPacket encapsulatedPacket = new EncapsulatedPacket();
             encapsulatedPacket.Reliability = reliability;
@@ -203,13 +204,16 @@ namespace RakDotNet.Minecraft
             pk.SequenceId = SendSequenceNumber++;
             pk.Packets = new[] {encapsulatedPacket};
             pk.EndPoint = packet.EndPoint;
-            Server.Client.SendPacket(pk);
+            SendPacket(pk);
         }
 
         public override void Disconnect(string reason)
         {
             Logger.Info(reason);
-            SendEncapsulatedPacket(new DisconnectionNotification(), Reliability.Unreliable, 0);
+            SendEncapsulatedPacket(new DisconnectionNotification
+            {
+                EndPoint = PeerEndPoint
+            }, Reliability.Reliable, 0);
             Server.Disconnect(PeerEndPoint);
         }
     }

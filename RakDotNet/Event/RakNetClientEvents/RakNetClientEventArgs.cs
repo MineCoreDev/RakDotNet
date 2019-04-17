@@ -4,11 +4,11 @@ namespace RakDotNet.Event.RakNetClientEvents
 {
     public class RakNetClientEventArgs : EventArgs
     {
-        public RakNetClient Client { get; }
+        public RakNetSocket Socket { get; }
 
-        public RakNetClientEventArgs(RakNetClient client)
+        public RakNetClientEventArgs(RakNetSocket socket)
         {
-            Client = client;
+            Socket = socket;
         }
     }
 }

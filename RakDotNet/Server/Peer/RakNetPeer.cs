@@ -1,10 +1,6 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Net;
-using RakDotNet.Minecraft;
-using RakDotNet.Minecraft.Packets;
-using RakDotNet.Minecraft.Packets.Acknowledge;
 using RakDotNet.Protocols.Packets;
 using RakDotNet.Protocols.Packets.MessagePackets;
 using RakDotNet.Utils;
@@ -67,7 +63,7 @@ namespace RakDotNet.Server.Peer
 
         public void Update()
         {
-            TimeSpan span = TimeSpan.FromTicks(Environment.TickCount);
+            TimeSpan span = TimeSpan.FromMilliseconds(Environment.TickCount);
             if (span.TotalMilliseconds - LastPingTime > TimeOut)
             {
                 Disconnect("timed out.");
@@ -76,7 +72,7 @@ namespace RakDotNet.Server.Peer
 
         public void SendPacket(RakNetPacket packet)
         {
-            Server.Client.SendPacket(packet);
+            Server.Socket.SendPacket(packet);
         }
     }
 }
