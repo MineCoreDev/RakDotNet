@@ -5,9 +5,7 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <Configurations>Release;Debug</Configurations>
         <Platforms>AnyCPU;x86</Platforms>
-        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
         <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-        <NuspecFile>RakDotNet.nuspec</NuspecFile>
         <Deterministic>false</Deterministic>
         <VersionPrefix>0.0.3</VersionPrefix>
         <VersionSuffix>beta</VersionSuffix>
@@ -19,6 +17,8 @@
         <RepositoryUrl>https://github.com/MineCoreDev/RakDotNet</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>NetworkLibrary</PackageTags>
+        <IsPackable>true</IsPackable>
+        <PackageVersion>0.0.4-beta</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>
