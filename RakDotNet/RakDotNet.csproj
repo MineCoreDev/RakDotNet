@@ -9,8 +9,16 @@
         <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
         <NuspecFile>RakDotNet.nuspec</NuspecFile>
         <Deterministic>false</Deterministic>
-        <VersionPrefix>0.0.2</VersionPrefix>
+        <VersionPrefix>0.0.3</VersionPrefix>
         <VersionSuffix>beta</VersionSuffix>
+        <Title>RakDotNet</Title>
+        <Authors>hiroki</Authors>
+        <Description>C# 100% RakNet Library</Description>
+        <Copyright>Copyright hiroki 2019</Copyright>
+        <PackageProjectUrl>https://github.com/MineCoreDev/RakDotNet</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/MineCoreDev/RakDotNet</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>NetworkLibrary</PackageTags>
     </PropertyGroup>
 
     <ItemGroup>

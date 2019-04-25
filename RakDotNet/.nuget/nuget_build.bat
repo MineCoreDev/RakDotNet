@@ -1,1 +1,1 @@
-nuget pack ../ -Prop Configuration=Release
+dotnet pack ../RakDotNet.csproj
