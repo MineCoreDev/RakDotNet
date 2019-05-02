@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Concurrent;
 using System.Net;
+using RakDotNet.Event;
+using RakDotNet.Event.RakNetPeerEvents;
 using RakDotNet.Protocols.Packets;
 using RakDotNet.Protocols.Packets.MessagePackets;
 using RakDotNet.Utils;
@@ -30,6 +32,10 @@ namespace RakDotNet.Server.Peer
         public ConcurrentDictionary<ushort, ConcurrentDictionary<int, EncapsulatedPacket>> SplitPackets =
             new ConcurrentDictionary<ushort, ConcurrentDictionary<int, EncapsulatedPacket>>();
 
+        public event EventHandler<PeerHandlePacketEventArgs> PeerHandlePacketEvent;
+        public event EventHandler<PeerHandleEncapsulatesPacketEventArgs> PeerHandleEncapsulatesPacketEvent;
+        public event EventHandler<PeerTimedOutEventArgs> PeerTimedOutEvent;
+
         public RakNetPeer(IPEndPoint endPoint, long clientId, ushort mtuSize)
         {
             PeerEndPoint = endPoint;
@@ -55,10 +61,14 @@ namespace RakDotNet.Server.Peer
 
         public virtual void HandlePeerPacket(RakNetPacket packet)
         {
+            new PeerHandlePacketEventArgs(this, packet)
+                .Invoke(this, PeerHandlePacketEvent);
         }
 
         public virtual void HandleEncapsulatedPacket(EncapsulatedPacket packet)
         {
+            new PeerHandleEncapsulatesPacketEventArgs(this, packet)
+                .Invoke(this, PeerHandleEncapsulatesPacketEvent);
         }
 
         public void Update()
@@ -66,6 +76,9 @@ namespace RakDotNet.Server.Peer
             TimeSpan span = TimeSpan.FromMilliseconds(Environment.TickCount);
             if (span.TotalMilliseconds - LastPingTime > TimeOut)
             {
+                new PeerTimedOutEventArgs(this)
+                    .Invoke(this, PeerTimedOutEvent);
+
                 Disconnect("timed out.");
             }
         }

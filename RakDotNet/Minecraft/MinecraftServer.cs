@@ -1,5 +1,7 @@
 using System;
 using System.Net;
+using RakDotNet.Event;
+using RakDotNet.Minecraft.Event.MineCraftServerEvents;
 using RakDotNet.Minecraft.Packets;
 using RakDotNet.Minecraft.Packets.Acknowledge;
 using RakDotNet.Protocols;
@@ -7,8 +9,6 @@ using RakDotNet.Protocols.Packets;
 using RakDotNet.Protocols.Packets.ConnectionPackets;
 using RakDotNet.Protocols.Packets.PingPackets;
 using RakDotNet.Server;
-using RakDotNet.Server.Peer;
-using RakDotNet.Utils;
 
 namespace RakDotNet.Minecraft
 {
@@ -38,6 +38,8 @@ namespace RakDotNet.Minecraft
 
         public String ServerListData { get; set; } = String.Empty;
 
+        public new event EventHandler<MineCraftServerConnectPeerEventArgs> ConnectPeerEvent;
+
         public MinecraftServer(IPEndPoint endPoint) : base(endPoint)
         {
             RegisterMinecraftDefaults();
@@ -49,6 +51,8 @@ namespace RakDotNet.Minecraft
 
         public override void HandleRakNetPacket(RakNetPacket packet)
         {
+            base.HandleRakNetPacket(packet);
+
             if (packet is CustomPacket customPacket && IsConnected(packet.EndPoint))
             {
                 IPEndPoint endPoint = packet.EndPoint;
@@ -108,6 +112,10 @@ namespace RakDotNet.Minecraft
         {
             MinecraftPeer peer = new MinecraftPeer(endPoint, clientId, mtuSize);
             AddPeer(peer);
+
+            new MineCraftServerConnectPeerEventArgs(this, peer)
+                .Invoke(this, ConnectPeerEvent);
+
             peer.Connect(this);
         }
 

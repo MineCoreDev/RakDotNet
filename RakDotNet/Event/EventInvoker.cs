@@ -8,13 +8,5 @@ namespace RakDotNet.Event
         {
             handler?.Invoke(sender, args);
         }
-
-        public static bool CancelableInvoke<T>(this T args, object sender, EventHandler<T> handler)
-            where T : ICancelableEvent
-        {
-            handler?.Invoke(sender, args);
-
-            return args.IsCanceled;
-        }
     }
 }

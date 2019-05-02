@@ -5,6 +5,8 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using BinaryIO;
+using RakDotNet.Event;
+using RakDotNet.Event.RakNetServerEvents;
 using RakDotNet.Protocols;
 using RakDotNet.Protocols.Packets;
 using RakDotNet.Server.Peer;
@@ -12,7 +14,7 @@ using RakDotNet.Utils;
 
 namespace RakDotNet.Server
 {
-    public class RakNetServer : IRakNetPacketHandler
+    public class RakNetServer : IRakNetPacketHandler, IDisposable
     {
         private ConcurrentDictionary<IPEndPoint, RakNetPeer> _connectedPeers =
             new ConcurrentDictionary<IPEndPoint, RakNetPeer>();
@@ -24,6 +26,12 @@ namespace RakDotNet.Server
 
         public Task ServerWorker { get; private set; }
         public CancellationTokenSource WorkerCancelToken { get; private set; }
+
+        public event EventHandler<ServerStartWorkerEventArgs> StartWorkerEvent;
+        public event EventHandler<ServerStopWorkerEventArgs> StopWorkerEvent;
+        public event EventHandler<ServerConnectPeerEventArgs> ConnectPeerEvent;
+        public event EventHandler<ServerDisconnectPeerEventArgs> DisconnectPeerEvent;
+        public event EventHandler<ServerPacketHandleEventArgs> PacketHandleEvent;
 
         public RakNetServer(IPEndPoint endPoint)
         {
@@ -46,6 +54,9 @@ namespace RakDotNet.Server
 
         public void StartServerWorker()
         {
+            new ServerStartWorkerEventArgs(this)
+                .Invoke(this, StartWorkerEvent);
+
             WorkerCancelToken = new CancellationTokenSource();
             ServerWorker = Task.Factory.StartNew(async () =>
             {
@@ -53,6 +64,9 @@ namespace RakDotNet.Server
                 {
                     if (WorkerCancelToken.IsCancellationRequested)
                     {
+                        new ServerStopWorkerEventArgs(this)
+                            .Invoke(this, StopWorkerEvent);
+
                         Logger.Info($"{ServerWorker.Id} is Canceled.");
                         WorkerCancelToken.Token.ThrowIfCancellationRequested();
                     }
@@ -79,13 +93,20 @@ namespace RakDotNet.Server
         {
             RakNetPeer peer = new RakNetPeer(endPoint, clientId, mtuSize);
             AddPeer(peer);
+
+            new ServerConnectPeerEventArgs(this, peer)
+                .Invoke(this, ConnectPeerEvent);
+
             peer.Connect(this);
         }
 
         public void Disconnect(IPEndPoint endPoint)
         {
-            if (_connectedPeers.ContainsKey(endPoint))
+            if (_connectedPeers.TryGetValue(endPoint, out RakNetPeer peer))
             {
+                new ServerDisconnectPeerEventArgs(this, peer)
+                    .Invoke(this, DisconnectPeerEvent);
+
                 RemovePeer(endPoint);
             }
         }
@@ -97,6 +118,8 @@ namespace RakDotNet.Server
 
         public virtual void HandleRakNetPacket(RakNetPacket packet)
         {
+            new ServerPacketHandleEventArgs(this, packet)
+                .Invoke(this, PacketHandleEvent);
         }
 
         protected void AddPeer<T>(T peer) where T : RakNetPeer
@@ -122,6 +145,14 @@ namespace RakDotNet.Server
             Guid = bs.ReadLong();
             PongId = bs.ReadLong();
             bs.Close();
+        }
+
+        public virtual void Dispose()
+        {
+            WorkerCancelToken.Cancel();
+            WorkerCancelToken = null;
+            ServerWorker?.Dispose();
+            Socket?.Dispose();
         }
     }
 }

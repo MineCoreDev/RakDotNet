@@ -1,13 +1,13 @@
 using RakDotNet.Protocols.Packets;
 
-namespace RakDotNet.Event.RakNetClientEvents
+namespace RakDotNet.Event.RakNetSocketEvents
 {
-    public class ClientPacketSendEventArgs : RakNetClientEventArgs
+    public class SocketPacketSendEventArgs : RakNetSocketEventArgs
     {
         public RakNetPacket SendPacket { get; }
         public ulong SendBytes { get; }
 
-        public ClientPacketSendEventArgs(RakNetSocket socket, RakNetPacket packet, ulong bytes) : base(socket)
+        public SocketPacketSendEventArgs(RakNetSocket socket, RakNetPacket packet, ulong bytes) : base(socket)
         {
             SendPacket = packet;
             SendBytes = bytes;

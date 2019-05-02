@@ -26,6 +26,8 @@ namespace RakDotNet.Minecraft
 
         public override void HandlePeerPacket(RakNetPacket packet)
         {
+            base.HandlePeerPacket(packet);
+
             if (packet is CustomPacket customPacket)
                 HandleCustomHandle(customPacket);
         }
@@ -53,6 +55,8 @@ namespace RakDotNet.Minecraft
 
         public override void HandleEncapsulatedPacket(EncapsulatedPacket packet)
         {
+            base.HandleEncapsulatedPacket(packet);
+
             if (packet.Reliability.IsUnreliable())
             {
                 HandleConnectedPacket(packet);

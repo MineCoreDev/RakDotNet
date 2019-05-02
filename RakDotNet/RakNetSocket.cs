@@ -4,7 +4,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using RakDotNet.Event;
-using RakDotNet.Event.RakNetClientEvents;
+using RakDotNet.Event.RakNetSocketEvents;
 using RakDotNet.Protocols;
 using RakDotNet.Protocols.Packets;
 using RakDotNet.Utils;
@@ -26,10 +26,10 @@ namespace RakDotNet
 
         public Action<RakNetPacket> OnReceive { private get; set; }
 
-        public event EventHandler<ClientStartWorkerEventArgs> StartWorkerEvent;
-        public event EventHandler<ClientStopWorkerEventArgs> StopWorkerEvent;
-        public event EventHandler<ClientPacketSendEventArgs> SendPacketEvent;
-        public event EventHandler<ClientPacketReceiveEventArgs> ReceivePacketEvent;
+        public event EventHandler<SocketStartWorkerEventArgs> StartWorkerEvent;
+        public event EventHandler<SocketStopWorkerEventArgs> StopWorkerEvent;
+        public event EventHandler<SocketPacketSendEventArgs> SendPacketEvent;
+        public event EventHandler<SocketPacketReceiveEventArgs> ReceivePacketEvent;
 
         public RakNetSocket(IPEndPoint endPoint) : base(endPoint)
         {
@@ -45,7 +45,7 @@ namespace RakDotNet
 
         public void StartReceiveWorker()
         {
-            new ClientStartWorkerEventArgs(this)
+            new SocketStartWorkerEventArgs(this)
                 .Invoke(this, StartWorkerEvent);
 
             WorkerCancelToken = new CancellationTokenSource();
@@ -55,7 +55,7 @@ namespace RakDotNet
                 {
                     if (WorkerCancelToken.IsCancellationRequested)
                     {
-                        new ClientStopWorkerEventArgs(this)
+                        new SocketStopWorkerEventArgs(this)
                             .Invoke(this, StopWorkerEvent);
 
                         Logger.Info($"{NetworkWorker.Id} is Canceled.");
@@ -95,7 +95,7 @@ namespace RakDotNet
                 throw new PacketDecodeException(e.Message, e);
             }
 
-            new ClientPacketReceiveEventArgs(this, packet, DownloadBytes)
+            new SocketPacketReceiveEventArgs(this, packet, DownloadBytes)
                 .Invoke(this, ReceivePacketEvent);
 
             return packet;
@@ -116,7 +116,7 @@ namespace RakDotNet
             byte[] buf = packet.GetBuffer();
             UploadBytes += (ulong) Send(buf, buf.Length, packet.EndPoint);
 
-            new ClientPacketSendEventArgs(this, packet, UploadBytes)
+            new SocketPacketSendEventArgs(this, packet, UploadBytes)
                 .Invoke(this, SendPacketEvent);
 
             packet.Close();
@@ -141,7 +141,7 @@ namespace RakDotNet
                 throw new PacketDecodeException(e.Message, e);
             }
 
-            new ClientPacketReceiveEventArgs(this, packet, DownloadBytes)
+            new SocketPacketReceiveEventArgs(this, packet, DownloadBytes)
                 .Invoke(this, ReceivePacketEvent);
 
             return packet;
@@ -162,7 +162,7 @@ namespace RakDotNet
             byte[] buf = packet.GetBuffer();
             UploadBytes += (ulong) await SendAsync(buf, buf.Length, packet.EndPoint);
 
-            new ClientPacketSendEventArgs(this, packet, UploadBytes)
+            new SocketPacketSendEventArgs(this, packet, UploadBytes)
                 .Invoke(this, SendPacketEvent);
 
             packet.Close();
