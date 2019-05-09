@@ -193,21 +193,84 @@ namespace RakDotNet.Minecraft
             SendPacket(packet);
         }
 
-        public void SendEncapsulatedPacket(RakNetPacket packet, Reliability reliability, byte flags)
+        public void SendEncapsulatedPacket(RakNetPacket packet, Reliability reliability, byte orderChannel = 0)
         {
             packet.EncodeHeader();
             packet.EncodePayload();
-
-            CustomPacket pk =
-                Server.Socket.PacketIdentifier.GetPacketFormId(MinecraftServer.CUSTOM_PACKET_4) as CustomPacket;
 
             EncapsulatedPacket encapsulatedPacket = new EncapsulatedPacket();
             encapsulatedPacket.Reliability = reliability;
             encapsulatedPacket.Payload = packet.GetBuffer();
 
+            if (reliability.IsOrdered() || reliability.IsSequenced())
+            {
+                encapsulatedPacket.OrderChannel = orderChannel;
+
+                if (!OrderIndexs.ContainsKey(orderChannel))
+                    OrderIndexs.TryAdd(orderChannel, 0);
+                uint index;
+                OrderIndexs.TryGetValue(orderChannel, out index);
+                encapsulatedPacket.OrderIndex = index;
+
+                OrderIndexs[orderChannel] = index++;
+            }
+
+            if (encapsulatedPacket.GetPacketSize() + 4 > MtuSize)
+            {
+                BinaryStream stream = new BinaryStream(encapsulatedPacket.Payload);
+                int splitSize = MtuSize - 60;
+                int splitIndex = 0;
+                int splitCount = (int) stream.Length / splitSize;
+                splitCount += (int) stream.Length % splitSize == 0 ? 0 : 1;
+                while (stream.Position < stream.Length)
+                {
+                    byte[] data;
+                    if (stream.Length - stream.Position >= splitSize)
+                        data = stream.ReadBytes(splitSize);
+                    else
+                        data = stream.ReadBytes();
+
+                    EncapsulatedPacket split = new EncapsulatedPacket();
+                    split.Split = true;
+                    split.SplitId = SplitID++;
+                    split.SplitCount = splitCount;
+                    split.SplitIndex = splitIndex;
+                    split.Reliability = reliability;
+                    split.Payload = data;
+                    split.OrderChannel = orderChannel;
+                    split.OrderIndex = encapsulatedPacket.OrderIndex;
+
+                    if (splitIndex > 0)
+                    {
+                        split.MessageIndex = SendMessageIndex++;
+                    }
+                    else
+                    {
+                        split.MessageIndex = SendMessageIndex;
+                    }
+
+                    SendDataPacket(packet.EndPoint, split);
+                }
+
+                return;
+            }
+
+            if (reliability.IsReliable())
+            {
+                encapsulatedPacket.MessageIndex = SendMessageIndex++;
+            }
+
+            SendDataPacket(packet.EndPoint, encapsulatedPacket);
+        }
+
+        private void SendDataPacket(IPEndPoint endPoint, EncapsulatedPacket packet)
+        {
+            CustomPacket pk =
+                Server.Socket.PacketIdentifier.GetPacketFormId(MinecraftServer.CUSTOM_PACKET_0) as CustomPacket;
+
             pk.SequenceId = SendSequenceNumber++;
-            pk.Packets = new[] {encapsulatedPacket};
-            pk.EndPoint = packet.EndPoint;
+            pk.Packets = new[] {packet};
+            pk.EndPoint = endPoint;
             SendPacket(pk);
         }
 

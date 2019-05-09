@@ -27,10 +27,16 @@ namespace RakDotNet.Server.Peer
         public uint StartMessageWindow { get; protected set; }
         public uint EndMessageWindow { get; protected set; } = 2048;
 
+        public uint SendMessageIndex { get; protected set; }
+
+        public ConcurrentDictionary<byte, uint> OrderIndexs = new ConcurrentDictionary<byte, uint>();
+
         public ConcurrentDictionary<uint, bool> MessageWindow { get; } = new ConcurrentDictionary<uint, bool>();
 
         public ConcurrentDictionary<ushort, ConcurrentDictionary<int, EncapsulatedPacket>> SplitPackets =
             new ConcurrentDictionary<ushort, ConcurrentDictionary<int, EncapsulatedPacket>>();
+
+        public ushort SplitID { get; protected set; }
 
         public event EventHandler<PeerHandlePacketEventArgs> PeerHandlePacketEvent;
         public event EventHandler<PeerHandleEncapsulatesPacketEventArgs> PeerHandleEncapsulatesPacketEvent;
