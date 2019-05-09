@@ -14,3 +14,4 @@ RakDotNet/obj
 RakDotNet/obj/*
 
 *.exe
+/RakDotNet/.nuget/nuget_install.bat
