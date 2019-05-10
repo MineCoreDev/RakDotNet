@@ -1,4 +1,3 @@
-using RakDotNet.Protocols;
 using RakDotNet.Protocols.Packets;
 
 namespace RakDotNet.Minecraft.Packets
