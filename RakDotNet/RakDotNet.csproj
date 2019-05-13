@@ -18,11 +18,11 @@
         <RepositoryType>git</RepositoryType>
         <PackageTags>NetworkLibrary</PackageTags>
         <IsPackable>true</IsPackable>
-        <PackageVersion>0.0.10-beta</PackageVersion>
+        <PackageVersion>0.0.12-beta</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="BinaryIO" Version="1.1.3" />
+        <PackageReference Include="BinaryIO" Version="1.1.4" />
         <PackageReference Include="Open.NAT.Core" Version="2.1.0" />
     </ItemGroup>
 

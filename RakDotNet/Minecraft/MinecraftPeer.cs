@@ -129,6 +129,7 @@ namespace RakDotNet.Minecraft
         {
             byte[] buffer = packet.Payload;
             RakNetPacket pk = Server.Socket.PacketIdentifier.GetPacketFormId(buffer[0]);
+            pk.EndPoint = PeerEndPoint;
             pk.SetBuffer(buffer);
 
             pk.DecodeHeader();
