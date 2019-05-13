@@ -269,6 +269,9 @@ namespace RakDotNet.Minecraft
             CustomPacket pk =
                 Server.Socket.PacketIdentifier.GetPacketFormId(MinecraftServer.CUSTOM_PACKET_0) as CustomPacket;
 
+            Logger.Info(pk.PacketId);
+            Logger.Info(SendSequenceNumber);
+
             pk.SequenceId = SendSequenceNumber++;
             pk.Packets = new[] {packet};
             pk.EndPoint = endPoint;

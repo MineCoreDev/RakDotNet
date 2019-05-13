@@ -18,7 +18,7 @@
         <RepositoryType>git</RepositoryType>
         <PackageTags>NetworkLibrary</PackageTags>
         <IsPackable>true</IsPackable>
-        <PackageVersion>0.0.12-beta</PackageVersion>
+        <PackageVersion>0.0.12-beta6</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>

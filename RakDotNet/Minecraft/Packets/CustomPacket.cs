@@ -20,10 +20,11 @@ namespace RakDotNet.Minecraft.Packets
 
         public CustomPacket(byte packetId)
         {
-            if (packetId <= 0x80 && packetId >= 0x8f)
+            if (packetId <= MinecraftServer.CUSTOM_PACKET_0
+                && packetId >= MinecraftServer.CUSTOM_PACKET_F)
                 _packetId = packetId;
-
-            throw new ArgumentOutOfRangeException(nameof(packetId));
+            else
+                throw new ArgumentOutOfRangeException(nameof(packetId));
         }
 
         public override void DecodeHeader()
