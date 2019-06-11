@@ -1,14 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp2.2</TargetFramework>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <Configurations>Release;Debug</Configurations>
-        <Platforms>AnyCPU;x86</Platforms>
-        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+        <TargetFramework>netstandard2.0</TargetFramework>
         <Deterministic>false</Deterministic>
-        <VersionPrefix>0.0.3</VersionPrefix>
-        <VersionSuffix>beta</VersionSuffix>
         <Title>RakDotNet</Title>
         <Authors>hiroki</Authors>
         <Description>C# 100% RakNet Library</Description>
@@ -18,12 +12,13 @@
         <RepositoryType>git</RepositoryType>
         <PackageTags>NetworkLibrary</PackageTags>
         <IsPackable>true</IsPackable>
-        <PackageVersion>0.0.13-beta</PackageVersion>
+        <PackageVersion>0.0.14-beta</PackageVersion>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="BinaryIO" Version="1.1.5" />
-        <PackageReference Include="Open.NAT.Core" Version="2.1.0" />
+        <PackageReference Include="BinaryIO" Version="1.1.5"/>
+        <PackageReference Include="Open.NAT" Version="2.1.0"/>
     </ItemGroup>
 
 </Project>

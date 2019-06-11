@@ -13,5 +13,17 @@ RakDotNet/bin/*
 RakDotNet/obj
 RakDotNet/obj/*
 
+RakDotNet.ConsoleTest/bin
+RakDotNet.ConsoleTest/bin/*
+
+RakDotNet.ConsoleTest/obj
+RakDotNet.ConsoleTest/obj/*
+
+RakDotNet.Tests/obj
+RakDotNet.Tests/obj/*
+
+RakDotNet.Tests/bin
+RakDotNet.Tests/bin/*
+
 *.exe
 /RakDotNet/.nuget/nuget_install.bat
