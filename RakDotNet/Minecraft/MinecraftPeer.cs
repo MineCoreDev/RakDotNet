@@ -203,17 +203,21 @@ namespace RakDotNet.Minecraft
             encapsulatedPacket.Reliability = reliability;
             encapsulatedPacket.Payload = packet.GetBuffer();
 
-            if (reliability.IsOrdered() || reliability.IsSequenced())
+            if (reliability.IsReliable())
             {
-                encapsulatedPacket.OrderChannel = orderChannel;
+                encapsulatedPacket.MessageIndex = SendMessageIndex++;
+                if (reliability.IsOrdered() || reliability.IsSequenced())
+                {
+                    encapsulatedPacket.OrderChannel = orderChannel;
 
-                if (!OrderIndexs.ContainsKey(orderChannel))
-                    OrderIndexs.TryAdd(orderChannel, 0);
-                uint index;
-                OrderIndexs.TryGetValue(orderChannel, out index);
-                encapsulatedPacket.OrderIndex = index;
+                    if (!OrderIndexs.ContainsKey(orderChannel))
+                        OrderIndexs.TryAdd(orderChannel, 0);
+                    uint index;
+                    OrderIndexs.TryGetValue(orderChannel, out index);
+                    encapsulatedPacket.OrderIndex = index;
 
-                OrderIndexs[orderChannel] = index++;
+                    OrderIndexs[orderChannel] = index++;
+                }
             }
 
             if (encapsulatedPacket.GetPacketSize() + 4 > MtuSize)
@@ -247,18 +251,19 @@ namespace RakDotNet.Minecraft
                     }
                     else
                     {
-                        split.MessageIndex = SendMessageIndex;
+                        split.MessageIndex = encapsulatedPacket.MessageIndex;
+                    }
+
+                    if (reliability.IsOrdered() || reliability.IsSequenced())
+                    {
+                        split.OrderChannel = encapsulatedPacket.OrderChannel;
+                        split.OrderIndex = encapsulatedPacket.OrderIndex;
                     }
 
                     SendDataPacket(packet.EndPoint, split);
                 }
 
                 return;
-            }
-
-            if (reliability.IsReliable())
-            {
-                encapsulatedPacket.MessageIndex = SendMessageIndex++;
             }
 
             SendDataPacket(packet.EndPoint, encapsulatedPacket);
